@@ -1,254 +1,144 @@
-/* Custom Font */
-@font-face {
-    font-family: 'YDGoth';
-    src: url('css/fonts/YDGothic\ 140\ Pro.woff2') format('woff2'),
-         url('css/fonts/YDGothic 140 Pro.woff') format('woff'),
-         url('./fonts/YDGothic 140 Pro.ttf.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
+:root {
+  --bg: #060510;
+  --panel: #090a14;
+  --purple: #8c6bbd;
+  --light-purple: #c8a9ef;
+  --pink: #dc8fc1;
+  --cream: #eee8dc;
+  --muted: #aaa3b2;
+  --line: #706183;
+  --gold: #dfc984;
+  --green: #75ef7b;
 }
 
-/* Basic reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
-/* Global styles */
 body {
-    font-family: 'YDGoth', sans-serif; /* Use the custom font */
+  margin: 0;
+  color: var(--cream);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 10px 10px, #8b62c8 0 1px, transparent 1.5px),
+    radial-gradient(circle at 35px 28px, #cab9ea 0 1px, transparent 1.5px),
+    linear-gradient(rgba(80, 52, 120, .16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(80, 52, 120, .16) 1px, transparent 1px);
+  background-size: 54px 54px, 72px 72px, 36px 36px, 36px 36px;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
+a { color: var(--light-purple); text-decoration: underline; text-underline-offset: 3px; }
+a:hover, a:focus-visible { color: #fff; background: #513777; outline: 1px dotted var(--pink); }
 
-/* Section styling */
-section {
-    height: 85vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
-    /*font-size: 1.5rem;*/
-}
+.site-shell { width: min(1480px, calc(100% - 32px)); margin: 14px auto; }
 
-/* Section-specific styles */
-#section1 {
-    background-color: rgb(232, 230, 230);
-    color: black;
-}
-
-.name {
-  font-size: 4rem;
-}
-
-.text {
-  font-size: 1rem;
+.site-header {
+  min-height: 165px;
+  padding: 16px 26px;
+  border: 2px ridge var(--purple);
+  background: linear-gradient(rgba(7,7,18,.58), rgba(7,7,18,.8)), radial-gradient(circle at center, #37224f, #070711 68%);
+  box-shadow: 0 0 18px #5f3e8a;
   text-align: center;
-  padding-left: 25rem;
-  padding-right: 25rem;
+  overflow: hidden;
 }
 
-
-#section5 {
-    background-color: #ccc; /* Lightest gray background */
+.site-header h1 {
+  margin: 0;
+  color: #f5f0e8;
+  font: bold clamp(3.5rem, 7vw, 6.8rem)/.9 Georgia, serif;
+  letter-spacing: .03em;
+  text-shadow: 4px 4px 0 #5d4b74, 7px 7px 0 #20162f;
 }
 
-/* h2 should be 6rem size and p should be 3rem and top padding should be 25vh*/
+.site-title { margin: 8px 0 0; font-size: clamp(1.1rem, 2.5vw, 2.25rem); font-weight: bold; letter-spacing: .08em; }
+.tagline, .eyebrow { margin: 3px 0; color: var(--light-purple); font-family: Georgia, serif; font-style: italic; }
+.eyebrow { font-family: "Courier New", monospace; font-size: .75rem; font-style: normal; letter-spacing: .1em; }
+.page-grid { margin-top: 10px; display: grid; grid-template-columns: 235px minmax(0, 1fr) 235px; gap: 10px; align-items: start; }
+.sidebar, main { display: grid; gap: 10px; }
 
-/* Section 2: Split layout with increased font sizes and color adjustments */
-#section2 {
-    display: flex;
-    justify-content: center;
-    align-items: stretch; /* Align items to stretch, making columns equal height */
-    background-color: #000; /* Black background */
-    color: white; /* Default text color for the section */
-    padding-top: 25vh; /* Use viewport height for responsive top padding */
+.window { min-width: 0; border: 2px ridge var(--line); background: rgba(7,8,17,.97); box-shadow: 2px 2px 0 #15101f; }
+.window-title { min-height: 24px; margin: 0; padding: 3px 7px; border-bottom: 2px ridge var(--line); color: #f5effb; background: linear-gradient(90deg, #2a1e4e, #0e1021 80%); font-size: .78rem; line-height: 16px; letter-spacing: .05em; }
+.window-title span { float: right; width: 15px; height: 15px; border: 1px outset var(--muted); text-align: center; line-height: 12px; }
+.window-content { padding: 11px; }
+.window-content p:first-child { margin-top: 0; }
+.window-content p:last-child { margin-bottom: 0; }
+
+.status { color: var(--green); font-weight: bold; }
+.status i { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+hr { border: 0; border-top: 1px dashed #897694; }
+.cat { margin: 8px 0 0; color: var(--gold); text-align: right; }
+.nav-links, .contact-links { display: grid; gap: 8px; }
+.nav-links a { display: block; }
+
+.welcome-content { min-height: 155px; display: grid; grid-template-columns: 85px 1fr 80px; gap: 16px; align-items: center; }
+.moon, .planet { color: var(--gold); font-size: 4.8rem; text-align: center; text-shadow: 0 0 15px #8f6eca; }
+.planet { color: #9470d3; font-size: 4rem; }
+.text-link { padding-top: 8px; border-top: 1px dashed #897694; }
+
+.rows article, .experience-item { display: grid; grid-template-columns: 125px minmax(0,1fr) auto; gap: 16px; padding: 14px; border-bottom: 1px dotted #52485f; }
+.rows article:last-child, .experience-item:last-child { border-bottom: 0; }
+.rows h3, .experience-item h3, .featured-project h3 { margin: 0 0 4px; color: #fff; font-size: 1rem; text-transform: uppercase; }
+.rows p { margin: 3px 0; }
+.date { color: #b79adc; font-size: .76rem; }
+.label { align-self: start; padding: 4px 7px; border: 1px solid var(--purple); color: var(--light-purple); font-size: .68rem; white-space: nowrap; }
+.role { margin: 0 0 7px; color: var(--gold); font-size: .78rem; }
+.experience-item ul { margin: 0; padding-left: 17px; }
+.experience-item li + li { margin-top: 5px; }
+.item-links { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 9px 0 0; font-size: .78rem; }
+
+.projects-content { padding: 12px; }
+.featured-project { padding: 10px; border: 3px ridge var(--purple); color: var(--cream); background: #100c1c; display: grid; grid-template-columns: 270px 1fr; gap: 16px; }
+.featured-project h3 { color: #fff; font-size: 1.2rem; }
+.vhs { min-height: 180px; padding: 16px; border: 8px ridge #47424a; background: linear-gradient(135deg,#19171b,#4b464b); color: var(--cream); display: flex; flex-direction: column; justify-content: space-between; box-shadow: inset 0 0 0 3px #0c0b0d; }
+.vhs b { width: 72%; padding: 12px; border: 1px solid var(--purple); color: var(--cream); background: #211636; font-size: 1.05rem; }
+.project-kicker, .tags { color: var(--light-purple); font-weight: bold; }
+.dotfiles-project { margin-top: 10px; padding: 10px; border: 2px ridge var(--purple); background: #100c1c; display: grid; grid-template-columns: minmax(260px,1.25fr) 1fr; gap: 16px; align-items: center; }
+.dotfiles-project h3 { margin: 0 0 5px; color: #fff; font-size: 1.15rem; text-transform: uppercase; }
+.dotfiles-project .project-kicker, .dotfiles-project .tags { color: var(--light-purple); }
+.dotfiles-image { display: block; padding: 4px; border: 2px inset #7c7085; background: #05040a; }
+.dotfiles-image img { display: block; width: 100%; height: auto; }
+.project-links { margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 8px; }
+.project-links a { padding: 7px; border: 1px outset #7c7085; background: #171225; text-align: center; }
+
+.music-player audio { width: 100%; margin: 8px 0; color-scheme: dark; }
+.music-player small { color: var(--light-purple); }
+
+.skill-cloud { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.skill-cloud span { color: #bda3d9; font-size: .78rem; }
+.skill-cloud .large { color: #fff; font-size: 1.25rem; }
+.badges { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.badges span { min-height: 38px; padding: 4px; border: 2px outset #8a7b92; color: #18131e; background: #d7d2ca; font: 9px Arial,sans-serif; text-align: center; }
+.badges span:nth-child(3n + 2) { background: #bca6d7; } .badges span:nth-child(3n) { background: #d9b9cb; }
+.contact-links a { overflow-wrap: anywhere; }
+.note { margin-top: 10px; padding: 12px; color: #251a2d; background: var(--gold); font-family: Georgia,serif; font-style: italic; transform: rotate(-1deg); }
+
+footer { margin-top: 10px; padding: 9px; border: 2px ridge var(--purple); background: #0c0915; display: flex; gap: 12px; align-items: center; justify-content: space-between; text-align: center; }
+footer a, footer small { padding: 5px 10px; border: 2px outset #796589; background: #211636; }
+footer span { flex: 1; color: var(--pink); }
+
+@media (max-width: 1100px) {
+  .page-grid { grid-template-columns: 200px minmax(0,1fr); }
+  .right-sidebar { grid-column: 1 / -1; grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 
-.split-container {
-    display: flex;
-    width: 80%; /* Set the width of the content */
-    height: 100%; /* Fill the entire height of the section */
-    text-align: left; /* Left justify text */
-    font-size: 0.5rem;
+@media (max-width: 760px) {
+  body { font-size: 13px; }
+  .site-shell { width: calc(100% - 12px); margin: 6px auto; }
+  .site-header { min-height: 130px; }
+  .site-header h1 { font-size: clamp(3rem,16vw,5rem); }
+  .page-grid, .right-sidebar { grid-template-columns: 1fr; }
+  .left-sidebar, main, .right-sidebar { grid-column: 1; }
+  .left-sidebar nav { order: -1; }
+  .nav-links { grid-template-columns: repeat(2,1fr); }
+  .welcome-content { grid-template-columns: 55px 1fr; }
+  .planet { display: none; }
+  .rows article, .experience-item { grid-template-columns: 88px minmax(0,1fr); }
+  .label { grid-column: 2; justify-self: start; }
+  .featured-project, .dotfiles-project, .project-links { grid-template-columns: 1fr; }
+  footer { flex-wrap: wrap; }
+  footer span { order: -1; flex-basis: 100%; }
 }
 
-.left, .right {
-    flex: 1; /* Each side takes up 50% of the container */
-    display: flex;
-    flex-direction: column; /* Stack items vertically */
-    justify-content: flex-start; /* Align items to start at the top */
-    padding: 20px; /* Optional padding for better spacing */
-    font-size: 3rem;
-    color: #95a2ab;
-}
-
-/* Scoped styles for Section 2 paragraphs */
-#section2 .right p {
-    font-size: 1.9rem; /* Increase font size for the paragraph */
-    /*max-width: 90%; /* Keep the paragraph narrower for better readability */
-    /*line-height: 1.7; /* Better line spacing */
-    color: white; /* White text for the right side */
-    padding-right: 9rem;
-    /*letter-spacing: -0.03em; /* Decrease letter spacing */
-    /*word-spacing: -0.03em; /* Decrease word spacing */
-}
-
-/* Optional: Media Queries for Smaller Screens */
-@media (max-width: 768px) {
-    #section2 {
-        padding-top: 15vh; /* Adjust padding for smaller screens */
-    }
-
-    #section2 .left h2 {
-        font-size: 2.5rem; /* Adjust font size for smaller screens */
-    }
-
-    #section2 .right p {
-        font-size: 1.2rem; /* Adjust font size for smaller screens */
-    }
-}
-/*For section 3 Qualifications section */
-
-#section3 {
-  background-color: rgb(164, 180, 191);;
-  color: black;
-  padding: 15rem;
-}
-
-.title {
-  width: 100%; /* Ensures the title spans the full width */
-}
-
-.content {
-  display: flex;
-  justify-content: space-between;
-  padding-top: 20px;
-}
-
-.left-side {
-  width: 45%;
-}
-
-.right-side {
-  width: 50%;
-}
-
-
-.left-side img, .right-side img {
-  display: block;
-  margin: 0 auto 10px auto;
-  width: 0px; /* Adjust the size as needed */
-  height: auto;
-  margin-left: 0px;
-}
-
-.education-title, .skills-title {
-  text-align: left;
-  padding-bottom: 2rem;
-  padding-left: 9wh;
-  font-size: 2rem;
-}
-
-
-.education-detail, .skills-detail {
-  text-align: left;
-  font-size: 1.2rem;
-}
-
-.qualifications-title {
-  font-size: 3rem;
-  padding-bottom: 4rem; /* Adds more space beneath "Qualifications" */
-  text-align: left;
-}
-
-/* Section 4: Project Experience layout */
-#section4 {
-    text-align: center; /* Center align the heading */
-    padding: 20px; /* General padding for the section */
-    background-color: rgb(232, 230, 230);
-    min-height: 80vh;
-}
-
-.main-title {
-    font-size: 2.5rem; /* Increase the font size for the Project Experience heading */
-    margin: 0; /* Remove any default margin */
-    color: #000; /* Change the text color to black */
-    padding-top: 5vh; /* Add padding above the title */
-    padding-bottom: 15vh; /* Add padding below the title */
-}
-
-.projects-container {
-    display: flex; /* Use flexbox for layout */
-    justify-content: space-around; /* Space between project sections */
-    flex-wrap: wrap; /* Wrap if there is not enough space */
-    padding-left: 10rem;
-    padding-right: 10rem;
-}
-
-.project {
-    width: 30%; /* Each project takes up 30% of the width */
-    text-align: center; /* Center align project text */
-    padding: 10px; /* Padding for individual project sections */
-}
-
-.project img {
-    max-width: 100%; /* Ensure images fit within the container */
-    height: auto; /* Maintain aspect ratio */
-    margin-bottom: 10px; /* Space below the image */
-}
-
-.project-name {
-    font-size: 1.3rem; /* Font size for project names */
-    margin-bottom: 5px; /* Space below project names */
-    color: #000;
-}
-
-.github-link a {
-    font-size: 1.2rem; /* Font size for GitHub links */
-    color: #007bff; /* Link color */
-    text-decoration: none; /* Remove underline from links */
-}
-
-.github-link a:hover {
-    text-decoration: underline; /* Underline on hover */
-}
-
-/* Section 5 contact me section */
-
-#section5 {
-  display: flex;
-  background-color: rgb(180, 169, 154);;
-  padding: 20px;
-  color: black;
-  max-height: 90vh;
-}
-
-.left-side {
-  width: 50%; /* Adjust as needed */
-}
-
-.right-side {
-  width: 50%; /* Adjust as needed */
-  padding-left: 20px; /* Add padding to separate from the image */
-}
-
-.contact-image {
-  width: 100%; /* Adjust as needed */
-  height: auto; /* Maintains aspect ratio */
-}
-
-.get-in-touch-title {
-  font-size: 3rem; /* Adjust font size as needed */
-  margin-bottom: 2rem; /* Space below the title */
-  text-align: left;
-}
-
-.get-in-touch-info {
-  font-size: 1.3rem;
-  text-align: left;
-  padding-right: 15rem;
-}
-
-
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

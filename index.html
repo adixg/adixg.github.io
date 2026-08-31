@@ -1,99 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aditya's Website</title>
-    <link rel="stylesheet" href="css/styles.css"> <!-- Link to your external CSS file -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aditya Ghosh - machine learning engineer and MS Computer Science student at Georgia Tech.">
+  <title>Aditya's Machine Learning Webspace</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-
-    <!-- Section 1: Name and About Me -->
-    <section id="section1">
-        <div>
-            <p class="name">Aditya Ghosh</p>
-            <p class="text">
-            Final Year Undergraduate Student in Computer Science Engineering with a Specialisation in Data Science
-            </p>
-        </div>
-    </section>
-
-    <!-- Section 2: Split into two parts (left and right) -->
-    <section id="section2">
-        <div class="split-container">
-            <div class="left">
-                <p>Hello there!</p>
-            </div>
-            <div class="right">
-                <p>
-                My name is Aditya and I'm a fourth year BTech Computer Science Engineering student at Vellore Institute of Technology University.
-                </p>
-            </div>
-        </div>
-    </section>
-
-<!-- Section 3: Qualifications -->
-<section id="section3">
-  <div class="title">
-    <p class="qualifications-title">Qualifications</p>
-    <div class="content">
-    <div class="left-side">
-      <img src="images/education.svg" alt="Education Image" style="width:10%; height:auto;">
-      <p class="education-title">Education</p>
-      <p class="education-detail">Bachelor's in Computer Science Engineering</p>
-      <p class="education-detail">Vellore Institute of Technology, Vellore</p>
-      <p class="education-detail">2021 to present</p>
-      <p class="education-detail">Specialized in Data Science and AI</p>
-      <p class="education-detail">GPA: 9.15</p>
+<body id="top">
+<div class="site-shell">
+  <header class="site-header">
+    <div>
+      <p class="eyebrow">WELCOME TO MY HOMEPAGE</p>
+      <h1>ADITYA GHOSH</h1>
+      <p class="site-title">PERSONAL HOMEPAGE</p>
+      <p class="tagline">machine learning, research, and notes</p>
     </div>
-    <div class="right-side">
-      <img src="images/skills.svg" alt="Skills Image" style="width:10%; height:auto;">
-      <p class="skills-title">Skills</p>
-      <p class="skills-detail">Programming Languages: Python, R, SQL</p>
-      <p class="skills-detail">Frameworks: PyTorch, Keras, Tensorflow</p>
-      <p class="skills-detail">Tools: Git, Docker, Jupyter, Bash, Linux</p>
-      <p class="skills-detail">Machine Learning and Deep Learning</p>
-      <p class="skills-detail">Statistics and Mathematics</p>
-    </div>
+  </header>
+
+  <div class="page-grid">
+    <aside class="sidebar left-sidebar" aria-label="About and navigation">
+      <section class="window">
+        <h2 class="window-title">▣ PROFILE.DAT <span>×</span></h2>
+        <div class="window-content">
+          <p class="status"><i></i> ONLINE</p>
+          <p>aditya_ghosh.exe</p><hr>
+          <p>MS Computer Science student at Georgia Tech.</p>
+          <p>ML engineer building models that learn from the real world.</p>
+          <pre class="cat" aria-label="pixel cat"> /\_/\\
+( o.o )
+ &gt; ^ &lt;</pre>
+        </div>
+      </section>
+
+      <nav class="window" aria-label="Site navigation">
+        <h2 class="window-title">▤ NAVIGATION.EXE <span>×</span></h2>
+        <div class="window-content nav-links">
+          <a href="#welcome">📁 WELCOME.TXT</a>
+          <a href="#education">📁 EDUCATION</a>
+          <a href="#experience">📁 EXPERIENCE.LOG</a>
+          <a href="#projects">📁 PROJECTS</a>
+          <a href="#skills">📁 SKILLS</a>
+          <a href="#contact">📁 CONTACT</a>
+        </div>
+      </nav>
+
+    </aside>
+
+    <main>
+      <section class="window" id="welcome">
+        <h2 class="window-title">▤ WELCOME.TXT <span>×</span></h2>
+        <div class="window-content welcome-content">
+          <div class="moon" aria-hidden="true">☾</div>
+          <div>
+            <p>Hey there! I'm Aditya Ghosh, a Computer Science MS student at Georgia Tech.</p>
+            <p>I design and build applied machine learning systems across computer vision, natural language processing, and production ML.</p>
+            <p>My work spans customer intelligence, additive manufacturing, medical imaging, language models, and generative temporal models.</p>
+            <p class="text-link"><a href="#experience">→ read my experience log</a></p>
+          </div>
+          <div class="planet" aria-hidden="true">✦</div>
+        </div>
+      </section>
+
+      <section class="window" id="education">
+        <h2 class="window-title">▤ EDUCATION.TXT <span>×</span></h2>
+        <div class="rows">
+          <article>
+            <div class="date">AUG 2025<br>— MAY 2027</div>
+            <div><h3>Georgia Institute of Technology</h3><p>MS in Computer Science · Atlanta, Georgia</p><p>ML Systems, Deep Learning in Text Data, Deterministic Optimization</p></div>
+            <b class="label">GPA 3.87</b>
+          </article>
+          <article>
+            <div class="date">SEP 2021<br>— JUL 2025</div>
+            <div><h3>Vellore Institute of Technology</h3><p>B.Tech. in Computer Science and Engineering · Vellore, India</p><p>Specialization in Data Science</p></div>
+            <b class="label">GPA 3.96</b>
+          </article>
+        </div>
+      </section>
+
+      <section class="window" id="experience">
+        <h2 class="window-title">▤ EXPERIENCE.LOG <span>×</span></h2>
+        <div class="experience-list">
+          <article class="experience-item">
+            <div class="date">MAY 2026<br>— AUG 2026</div>
+            <div><h3>Tractian</h3><p class="role">Machine Learning Intern · Atlanta, Georgia</p><ul>
+              <li>Built a CatBoost churn model that increased early identification of non-renewing customers from 34% to 68%.</li>
+              <li>Created leakage-safe features and walk-forward validation across 10+ classifiers, reaching 62% AUC-PR.</li>
+              <li>Built a Slack early-warning system, an internal FAQ/video RAG system, and a 6-DOF robotic-arm digital twin vision pipeline.</li>
+            </ul></div><span class="label">MACHINE LEARNING</span>
+          </article>
+
+          <article class="experience-item">
+            <div class="date">DEC 2025<br>— AUG 2026</div>
+            <div><h3>Georgia Institute of Technology</h3><p class="role">Graduate Assistant · Atlanta, Georgia</p><ul>
+              <li>Developed a microscopy-to-SEM vision pipeline for nanoscale manufacturing quality, reaching 97.8% grouped accuracy.</li>
+              <li>Built area-level curing classifiers with 86.2% average accuracy and up to 93.1% on individual region classes.</li>
+              <li>Demonstrated transfer learning from cylindrical to unseen woodpile geometries; paper submitted to <i>Additive Manufacturing</i>.</li>
+            </ul></div><span class="label">COMPUTER VISION</span>
+          </article>
+
+          <article class="experience-item">
+            <div class="date">JAN 2026<br>— MAY 2026</div>
+            <div><h3>Feola Lab, Emory University</h3><p class="role">Student Researcher · Atlanta, Georgia</p><ul>
+              <li>Engineered a multi-modal 9-class ophthalmic segmentation model across fundus and OCT datasets, achieving 0.81–0.99 Dice scores.</li>
+              <li>Applied warm-start transfer learning and managed tuning and experiment tracking with Weights &amp; Biases.</li>
+            </ul><p class="item-links"><a href="https://drive.google.com/drive/folders/1ED1jbSqlYFxXJTPnS7A6vPQPOqf1Z42i?usp=sharing" target="_blank" rel="noreferrer">↗ View research report and poster</a></p></div><span class="label">MEDICAL AI</span>
+          </article>
+
+          <article class="experience-item">
+            <div class="date">MAY 2025<br>— JUN 2025</div>
+            <div><h3>Indian Institute of Technology Kharagpur</h3><p class="role">Research Intern · Kharagpur, India</p><ul>
+              <li>Developed diffusion-based temporal point-process models in PyTorch for unconditional event generation.</li>
+              <li>Benchmarked Cross Diffusion against Intensity-Free Learning across synthetic and real datasets, reducing average MMD by 47%.</li>
+            </ul><p class="item-links"><a href="https://github.com/adixg/cdiff_changed" target="_blank" rel="noreferrer">↗ View repository</a><a href="https://docs.google.com/presentation/d/1Cl_JE7iunUYMW4KGBHgZriDppPFFKtrs/edit?usp=sharing&amp;ouid=105604371020309274790&amp;rtpof=true&amp;sd=true" target="_blank" rel="noreferrer">↗ View research presentation</a></p></div><span class="label">GENERATIVE ML</span>
+          </article>
+
+          <article class="experience-item">
+            <div class="date">JUN 2024<br>— JUL 2024</div>
+            <div><h3>Indian Statistical Institute</h3><p class="role">Research Intern · Kolkata, India</p><ul>
+              <li>Fine-tuned a 4-bit Mistral-7B model with LoRA, cutting training time by 50% while reducing memory use.</li>
+              <li>Evaluated expanded queries with SBERT, achieving 0.7218 average cosine similarity on a held-out test set.</li>
+            </ul><p class="item-links"><a href="https://github.com/adixg/finetuning_mistral" target="_blank" rel="noreferrer">↗ View Mistral fine-tuning repository</a></p></div><span class="label">NLP</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="window" id="projects">
+        <h2 class="window-title">📁 PROJECTS <span>×</span></h2>
+        <div class="projects-content">
+          <article class="featured-project">
+            <div class="vhs" aria-hidden="true"><small>DATA ARCHIVE</small><b>HALLUCINATION<br>DETECTION</b></div>
+            <div>
+              <p class="project-kicker">FEATURED CASE STUDY · DATA4GOOD 2025</p>
+              <h3>Natural Language Inference–Based Hallucination Detection</h3>
+              <p>Built an ensemble of a fine-tuned DeBERTa MNLI model and an Azure OpenAI gpt-5-mini judge to detect factual consistency, contradictions, and irrelevant responses.</p>
+              <p>Regional champions: 1st in the East region out of 1,015 teams, with 96.5% final accuracy.</p>
+              <p class="tags">Python · PyTorch · Transformers · NLI · RAG</p>
+              <p><a href="https://docs.google.com/presentation/d/1o2Xo4uYEQjmoMkpNVbVx3Sh4IRLitxQ1/edit?usp=sharing&amp;ouid=105604371020309274790&amp;rtpof=true&amp;sd=true" target="_blank" rel="noreferrer">↗ View Data4Good case-study presentation</a></p>
+            </div>
+          </article>
+          <article class="dotfiles-project">
+            <a class="dotfiles-image" href="https://github.com/adixg/dotfiles" target="_blank" rel="noreferrer">
+              <img src="assets/dotfiles-setup.jpeg" alt="Aditya's purple Hyprland desktop showing system monitors, terminal tools, and network activity">
+            </a>
+            <div>
+              <p class="project-kicker">PERSONAL SETUP · LINUX</p>
+              <h3>Dotfiles</h3>
+              <p>Configuration for my day-to-day Linux environment, including Hyprland, Waybar, Kitty, Neovim, terminal monitors, launchers, notifications, and music tools.</p>
+              <p class="tags">Hyprland · Waybar · Kitty · Neovim · Zsh · Cava</p>
+              <p><a href="https://github.com/adixg/dotfiles" target="_blank" rel="noreferrer">↗ View dotfiles repository</a></p>
+            </div>
+          </article>
+          <div class="project-links">
+            <a href="https://github.com/adixg/repo-health-analysis" target="_blank" rel="noreferrer">↗ RepoSense repository intelligence</a>
+            <a href="https://github.com/adixg/technician_helper" target="_blank" rel="noreferrer">↗ Technician Helper RAG system</a>
+            <a href="https://github.com/adixg/redditsentiment" target="_blank" rel="noreferrer">↗ Reddit sentiment &amp; stock prices</a>
+            <a href="https://github.com/adixg/segmentationwebsite" target="_blank" rel="noreferrer">↗ U-Net image segmentation</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="sidebar right-sidebar" aria-label="Skills and contact">
+      <section class="window">
+        <h2 class="window-title">▤ NOW PLAYING <span>×</span></h2>
+        <div class="window-content music-player">
+          <p><b>Nujabes</b><br>Luv(sic.) pt3 (feat. Shing02)</p>
+          <audio controls autoplay preload="metadata">
+            <source src="assets/luvsic-pt3.mp3" type="audio/mpeg">
+            Your browser does not support audio. <a href="assets/luvsic-pt3.mp3">Download the track</a>.
+          </audio>
+          <small>♪ press play to listen</small>
+        </div>
+      </section>
+
+      <section class="window" id="skills">
+        <h2 class="window-title">▤ SKILLS CLOUD <span>×</span></h2>
+        <div class="window-content skill-cloud">
+          <span class="large">Python</span><span>R</span><span>SQL</span><span>C++</span><span class="large">Machine Learning</span><span>Deep Learning</span><span>Computer Vision</span><span>NLP</span><span>PyTorch</span><span>TensorFlow</span><span>Keras</span><span>Scikit-learn</span><span>Transformers</span><span>LangChain</span><span>LangGraph</span><span>Tableau</span><span>Spark</span><span>Databricks</span><span>AWS</span><span>GCP</span><span>Docker</span><span>Kubernetes</span><span>Linux</span><span>REST APIs</span><span>Streamlit</span>
+        </div>
+      </section>
+
+      <section class="window">
+        <h2 class="window-title">▤ COOL BADGES <span>×</span></h2>
+        <div class="window-content badges">
+          <span>🌐 MADE WITH<br><b>HTML</b></span><span>🎨 MADE WITH<br><b>CSS</b></span><span>☕ POWERED BY<br><b>CAFFEINE</b></span><span>🐧 TESTED ON<br><b>LINUX</b></span><span>☺ BUILT BY<br><b>A HUMAN</b></span><span>★ THANKS,<br><b>INTERNET!</b></span>
+        </div>
+      </section>
+
+      <section class="window" id="contact">
+        <h2 class="window-title">▤ CONTACT <span>×</span></h2>
+        <div class="window-content contact-links">
+          <a href="mailto:aditya.ghosh@gatech.edu">✉ aditya.ghosh@gatech.edu</a>
+          <a href="https://linkedin.com/in/aditya-ghosh-ml" target="_blank" rel="noreferrer">▣ linkedin.com/in/aditya-ghosh-ml</a>
+          <a href="https://github.com/adixg" target="_blank" rel="noreferrer">◉ github.com/adixg</a>
+          <a href="https://github.com/adixg/adixg.github.io" target="_blank" rel="noreferrer">⌘ view this site's source</a>
+          <p class="note">Let's build something impactful together! ☺</p>
+        </div>
+      </section>
+    </aside>
   </div>
-</section>
 
-
-
-<div id="section4">
-    <p class="main-title">Project Experience</p>
-    <div class="projects-container">
-        <div class="project">
-            <img src="images/project1.svg" alt="Project 1", style="width: 30%; height: auto;">
-            <p class="project-name">Reddit sentiment analysis correlation with stock prices</p>
-            <p class="github-link"><a href="https://github.com/Nanashi-bot/redditsentiment">Github Link</a></p>
-        </div>
-        <div class="project">
-            <img src="images/project2.svg" alt="Project 2", style="width: 30%; height: auto;">
-            <p class="project-name">Finetuning mistral llm for query expansion</p>
-            <p class="github-link"><a href="https://github.com/Nanashi-bot/finetuning_mistral">Github Link</a></p>
-        </div>
-        <div class="project">
-            <img src="images/project3.svg" alt="Project 3", style="width: 30%; height: auto;">
-            <p class="project-name">Image segmentation using U Net</p>
-            <p class="github-link"><a href="https://github.com/Nanashi-bot/segmentationwebsite">GitHub Link</a></p>
-        </div>
-    </div>
+  <footer>
+    <a href="#top">▲ TOP</a><a href="https://github.com/adixg" target="_blank" rel="noreferrer">★ ADD TO FAVORITES</a><span>✦ WELCOME TO MY WEBSPACE! ✦</span><a href="mailto:aditya.ghosh@gatech.edu">✉ SEND MAIL</a><small>hand-coded with HTML + CSS ♥</small>
+  </footer>
 </div>
-
-
-    <!-- Section 5: Placeholder for other content -->
-    <section id="section5">
-  <div class="left-side">
-    <img src="path/to/your-image.jpg" alt="Contact Image" class="contact-image">
-  </div>
-  <div class="right-side">
-    <p class="get-in-touch-title">Get in touch</p>
-    <p class="get-in-touch-info">If you want to work together, you can reach me at adityaghosh2772@gmail.com.</p>
-  </div>
-</section>
-
 </body>
 </html>
-
-
