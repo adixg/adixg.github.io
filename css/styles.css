@@ -32,7 +32,7 @@ body {
 a { color: var(--light-purple); text-decoration: underline; text-underline-offset: 3px; }
 a:hover, a:focus-visible { color: #fff; background: #513777; outline: 1px dotted var(--pink); }
 
-.site-shell { width: min(1480px, calc(100% - 32px)); margin: 14px auto; }
+.site-shell { width: min(1120px, calc(100% - 32px)); margin: 14px auto; }
 
 .site-header {
   min-height: 165px;
@@ -55,7 +55,7 @@ a:hover, a:focus-visible { color: #fff; background: #513777; outline: 1px dotted
 .site-title { margin: 8px 0 0; font-size: clamp(1.1rem, 2.5vw, 2.25rem); font-weight: bold; letter-spacing: .08em; }
 .tagline, .eyebrow { margin: 3px 0; color: var(--light-purple); font-family: Georgia, serif; font-style: italic; }
 .eyebrow { font-family: "Courier New", monospace; font-size: .75rem; font-style: normal; letter-spacing: .1em; }
-.page-grid { margin-top: 10px; display: grid; grid-template-columns: 235px minmax(0, 1fr) 235px; gap: 10px; align-items: start; }
+.page-grid { margin-top: 10px; display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 10px; align-items: start; }
 .sidebar, main { display: grid; gap: 10px; }
 
 .window { min-width: 0; border: 2px ridge var(--line); background: rgba(7,8,17,.97); box-shadow: 2px 2px 0 #15101f; }
@@ -118,8 +118,8 @@ footer { margin-top: 10px; padding: 9px; border: 2px ridge var(--purple); backgr
 footer a, footer small { padding: 5px 10px; border: 2px outset #796589; background: #211636; }
 footer span { flex: 1; color: var(--pink); }
 
-@media (max-width: 1100px) {
-  .page-grid { grid-template-columns: 200px minmax(0,1fr); }
+@media (max-width: 850px) {
+  .page-grid { grid-template-columns: 1fr; }
   .right-sidebar { grid-column: 1 / -1; grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 
@@ -129,8 +129,7 @@ footer span { flex: 1; color: var(--pink); }
   .site-header { min-height: 130px; }
   .site-header h1 { font-size: clamp(3rem,16vw,5rem); }
   .page-grid, .right-sidebar { grid-template-columns: 1fr; }
-  .left-sidebar, main, .right-sidebar { grid-column: 1; }
-  .left-sidebar nav { order: -1; }
+  main, .right-sidebar { grid-column: 1; }
   .nav-links { grid-template-columns: repeat(2,1fr); }
   .welcome-content { grid-template-columns: 55px 1fr; }
   .planet { display: none; }
