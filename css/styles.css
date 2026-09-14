@@ -77,17 +77,17 @@ hr { border: 0; border-top: 1px dashed #897694; }
 .planet { color: #9470d3; font-size: 4rem; }
 .text-link { padding-top: 8px; border-top: 1px dashed #897694; }
 
-.rows article, .experience-item { display: grid; grid-template-columns: 125px minmax(0,1fr) auto; gap: 16px; padding: 14px; border-bottom: 1px dotted #52485f; }
+.rows article, .experience-item { display: grid; grid-template-columns: minmax(0,1fr) 170px; gap: 16px; padding: 14px 22px 14px 14px; border-bottom: 1px dotted #52485f; }
 .rows article:last-child, .experience-item:last-child { border-bottom: 0; }
 .rows h3, .experience-item h3, .featured-project h3 { margin: 0 0 4px; color: #fff; font-size: 1rem; text-transform: uppercase; }
 .rows p { margin: 3px 0; }
-.date { color: #b79adc; font-size: .76rem; }
+.date { color: #b79adc; font-size: .76rem; white-space: nowrap; }
 .label { align-self: start; padding: 4px 7px; border: 1px solid var(--purple); color: var(--light-purple); font-size: .68rem; white-space: nowrap; }
+.entry-meta { display: grid; gap: 8px; align-content: start; justify-items: end; text-align: right; }
 .role { margin: 0 0 7px; color: var(--gold); font-size: .78rem; }
 .experience-item ul { margin: 0; padding-left: 17px; }
 .experience-item li + li { margin-top: 5px; }
 .item-links { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 9px 0 0; font-size: .78rem; }
-
 .projects-content { padding: 12px; }
 .featured-project { padding: 10px; border: 3px ridge var(--purple); color: var(--cream); background: #100c1c; display: grid; grid-template-columns: 270px 1fr; gap: 16px; }
 .featured-project h3 { color: #fff; font-size: 1.2rem; }
@@ -134,8 +134,7 @@ footer span { flex: 1; color: var(--pink); }
   .nav-links { grid-template-columns: repeat(2,1fr); }
   .welcome-content { grid-template-columns: 55px 1fr; }
   .planet { display: none; }
-  .rows article, .experience-item { grid-template-columns: 88px minmax(0,1fr); }
-  .label { grid-column: 2; justify-self: start; }
+  .rows article, .experience-item { grid-template-columns: minmax(0,1fr) 145px; gap: 10px; padding-right: 16px; }
   .featured-project, .visual-project, .project-links { grid-template-columns: 1fr; }
   footer { flex-wrap: wrap; }
   footer span { order: -1; flex-basis: 100%; }
