@@ -76,6 +76,8 @@ hr { border: 0; border-top: 1px dashed #897694; }
 .moon, .planet { color: var(--gold); font-size: 4.8rem; text-align: center; text-shadow: 0 0 15px #8f6eca; }
 .planet { color: #9470d3; font-size: 4rem; }
 .text-link { padding-top: 8px; border-top: 1px dashed #897694; }
+.quick-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; padding-top: 9px; border-top: 1px dashed #897694; }
+.quick-links a { white-space: nowrap; }
 
 .rows article, .experience-item { display: grid; grid-template-columns: minmax(0,1fr) 170px; gap: 16px; padding: 14px 22px 14px 14px; border-bottom: 1px dotted #52485f; }
 .rows article:last-child, .experience-item:last-child { border-bottom: 0; }
