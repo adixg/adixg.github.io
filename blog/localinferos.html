@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="How Aditya Ghosh built LocalInferOS, an 18 MB Linux environment for portable, hardware-aware local LLM inference.">
+  <title>LocalInferOS: Building an 18 MB Linux Environment | Aditya Ghosh</title>
+  <link rel="stylesheet" href="../css/styles.css?v=19">
+</head>
+<body class="blog-page" id="top">
+<div class="site-shell">
+  <header class="site-header">
+    <h1>Aditya Ghosh</h1>
+    <p class="site-title">PROJECT LOG</p>
+    <p><a href="../index.html#projects">← Back to portfolio</a></p>
+  </header>
+
+  <main>
+    <article class="window">
+      <h2 class="window-title">▤ BLOG/LOCALINFEROS.TXT <span>×</span></h2>
+      <div class="blog-article">
+        <h1>LocalInferOS: Building an 18 MB Linux Environment for Portable LLM Inference</h1>
+        <p class="dek">A bootable USB environment that profiles the host machine, predicts local model performance, and runs llama.cpp without installing anything on the internal drive.</p>
+        <p class="blog-meta">PROJECT LOG · LOCAL LLM INFERENCE · RUST / LINUX / LLAMA.CPP</p>
+        <p>Have you ever wished you could run a local LLM that makes the most of your laptop or desktop&#39;s available CPU and RAM? Well, wish no more, for I have the answer to a question you probably never asked.</p>
+<p>Introducing <strong>LocalInferOS</strong>: a minimal BusyBox-based Linux system that uses Ubuntu&#39;s kernel, llama.cpp for inference, and a Rust TUI that boots directly into a local LLM chat interface.</p>
+<p>The entire compressed initramfs is just <strong>18 MB</strong> (43 MB unpacked), including the required kernel module tree. The Linux kernel and model weights are separate, before anyone asks.</p>
+<p>The way it works is fairly simple. You download the <code>.img.xz</code> file from the GitHub releases, decompress it, flash the image onto your USB stick, plug it into your machine, and boot straight into LocalInferOS.</p>
+<p>Instructions for building the image yourself are also provided in the README, for those who are a little extra paranoid about the man upstairs stealing their data to train AI models that&#39;ll eventually replace them. Jkjk (mostly).</p>
+<p>Once you&#39;re in, LocalInferOS profiles your hardware, benchmarks the bundled Qwen3-1.7B model, and uses the results to estimate how fast other local LLMs would run on your machine.</p>
+<p>It then recommends models based on your machine&#39;s RAM and estimated token generation speed. You can download another model over Ethernet or stick with the bundled Qwen3-1.7B and start chatting.</p>
+<p>The interesting part is that <strong>the models, conversation history, and configuration all live on the USB stick itself</strong>. No installation on the laptop&#39;s internal SSD is needed.</p>
+<p>But how does all of this actually work?</p>
+<hr>
+<h2>1. Predicting LLM Performance Without Downloading Every Model</h2>
+<p>This was probably the most interesting part of the project.</p>
+<p>Before somebody downloads a multi-gigabyte GGUF model, I wanted LocalInferOS to answer two questions:</p>
+<ul>
+<li>Will this model fit in memory?</li>
+<li>How many tokens per second can I realistically expect?</li>
+</ul>
+<p>The obvious solution would be to download every candidate model, benchmark it, and recommend whichever performed best.</p>
+<p>Unfortunately, downloading 30 GB of models to figure out which one works on a 16 GB USB stick seems like a slight design flaw.</p>
+<p>So instead, I wanted to <strong>benchmark a single reference model and use its performance to predict the others</strong>.</p>
+<h3>Why this works: LLM generation is often memory-bandwidth-bound</h3>
+<p>LLMs generate text autoregressively, meaning they predict one token at a time.</p>
+<p>For a typical dense transformer running single-user inference, generating a token involves matrix-vector operations that access most of the model&#39;s weights.</p>
+<p>These operations perform relatively little arithmetic per byte of weight data. Modern CPUs can execute enormous numbers of arithmetic operations per second, but accessing data from RAM is comparatively expensive.</p>
+<p>Consequently, <strong>single-stream CPU token generation is often limited by memory bandwidth rather than raw computational throughput</strong>.</p>
+<p>This gives us a simple approximation:</p>
+<div class="equation">Tokens/sec ≈ Effective memory bandwidth ÷ Weight bytes accessed per token</div>
+
+<p>For a dense model, the weight bytes accessed per token are approximately the model&#39;s quantized weight size.</p>
+<p>For example, if a machine achieves 40 GB/s of effective inference bandwidth, a 5 GB model would theoretically generate around:</p>
+<div class="equation">40 ÷ 5 = 8 tokens/sec</div>
+
+<p>Double the model size, and generation throughput should roughly halve.</p>
+<p>Of course, this is an approximation. Attention, KV-cache reads, quantization overhead, synchronization, and kernel efficiency all complicate the picture.</p>
+<p>But it&#39;s a useful starting point.</p>
+<p>One important distinction: this model estimates <strong>generation speed</strong>, or the rate at which new tokens appear. Prompt processing is a different workload, where processing multiple tokens together allows greater weight reuse and is often much more compute-intensive.</p>
+<p>LocalInferOS currently predicts generation throughput, not prompt-processing throughput.</p>
+<hr>
+<h2>2. Benchmarking the Reference Model</h2>
+<p>For the reference model, I use <strong>Qwen3-1.7B Q4_K_M</strong>, whose GGUF is approximately 1.28 GB.</p>
+<p>Rather than implementing a benchmarking framework from scratch, I use llama.cpp&#39;s <code>llama-bench</code> tool.</p>
+<p>A simplified benchmark command looks like this:</p>
+<pre><code class="language-bash">llama-bench \
+  -m Qwen3-1.7B-Q4_K_M.gguf \
+  -ngl 0 \
+  -p 0 \
+  -n 64 \
+  -r 1 \
+  -o json
+</code></pre>
+<p>The important arguments are:</p>
+<ul>
+<li><code>-ngl 0</code>: CPU-only inference.</li>
+<li><code>-p 0</code>: Skip the separate prompt-processing benchmark.</li>
+<li><code>-n 64</code>: Benchmark generating 64 tokens.</li>
+<li><code>-r 1</code>: Run each configuration once initially to keep profiling fast.</li>
+<li><code>-o json</code>: Return machine-readable output that Rust can parse.</li>
+</ul>
+<p>However, measuring one thread configuration wouldn&#39;t tell us much.</p>
+<h3>Finding the optimal CPU thread count</h3>
+<p>More CPU threads should mean more performance, right?</p>
+<p>Well, not necessarily.</p>
+<p>Initially, adding threads increases inference throughput because more CPU cores can participate in reading weights and performing computations.</p>
+<p>Eventually, though, memory bandwidth becomes saturated. Beyond that point, additional threads contribute little and can sometimes slow things down through contention and synchronization overhead.</p>
+<p>Here&#39;s what I measured on my Intel Core i7-13650HX:</p>
+<table>
+<thead>
+<tr>
+<th>CPU threads</th>
+<th align="right">Generation speed</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2</td>
+<td align="right">19.6 tok/s</td>
+</tr>
+<tr>
+<td>4</td>
+<td align="right">28.5 tok/s</td>
+</tr>
+<tr>
+<td>6</td>
+<td align="right">32.1 tok/s</td>
+</tr>
+<tr>
+<td>8</td>
+<td align="right">31.7 tok/s</td>
+</tr>
+<tr>
+<td>10</td>
+<td align="right">32.1 tok/s</td>
+</tr>
+</tbody></table>
+<figure class="blog-figure"><img src="../assets/localinferos-thread-scaling.png?v=2" alt="Line chart showing LocalInferOS generation throughput plateauing around six CPU threads"><figcaption>Figure 1: CPU thread count versus generation throughput.</figcaption></figure>
+
+<p>Performance improves significantly between two and six threads, then more or less plateaus.</p>
+<p>My processor exposes 20 logical threads, but using all of them isn&#39;t necessary to achieve near-maximum performance for this workload.</p>
+<p>LocalInferOS therefore tests a series of thread counts rather than assuming that the maximum available count is optimal.</p>
+<p>The profiler starts with a small number of threads, increases the count, and stops after observing a slowdown. On my machine, that means it can stop after testing 2, 4, 6, and 8 threads.</p>
+<p>This is a heuristic rather than an exhaustive optimization. A noisy measurement could cause an early stop, and a later thread count might perform similarly or better.</p>
+<p>Still, it reduces profiling time substantially, with typical runs on my setup taking roughly 10–20 seconds.</p>
+<p>The chosen <code>best_threads</code> value is saved and passed to llama.cpp during normal chat inference.</p>
+<h3>Why I don&#39;t trust a single benchmark run</h3>
+<p>While testing, I noticed something strange.</p>
+<p>A 4B model that normally generated around 14 tok/s would occasionally report over 40 tok/s.</p>
+<p>That result would imply effective memory bandwidth greater than I would expect from the laptop&#39;s memory configuration.</p>
+<p>Other runs occasionally reported 0.0 tok/s, even though the benchmark had finished within seconds.</p>
+<p>These anomalies appeared during testing under WSL. Timing or clock behavior is a possible explanation, although I haven&#39;t isolated the exact cause.</p>
+<p>To avoid building the entire predictor around an obviously incorrect measurement, I added a validation step.</p>
+<p>After finding the best thread count, LocalInferOS benchmarks that configuration again.</p>
+<ul>
+<li>If the two measurements agree within 20%, it uses their average.</li>
+<li>If they disagree, it takes a third measurement and uses the median.</li>
+</ul>
+<p>This provides protection against measurement outliers without requiring repeated benchmarking of every thread configuration.</p>
+<hr>
+<h2>3. Estimating Effective Memory Bandwidth</h2>
+<p>Once I have a stable generation throughput measurement, I can estimate the effective memory bandwidth achieved by the inference workload.</p>
+<p>The formula is:</p>
+<div class="equation">BW<sub>effective</sub> = TPS<sub>measured</sub> × W<sub>reference</sub></div>
+
+<p>On my laptop, the calibrated generation speed was approximately 32.4 tok/s.</p>
+<p>Using the 1.28 GB reference model:</p>
+<div class="equation">BW<sub>effective</sub> = 32.4 × 1.28 ≈ 41.5 GB/s</div>
+
+<p>This isn&#39;t a direct measurement of physical RAM bandwidth.</p>
+<p>It&#39;s an <strong>inference-derived effective bandwidth</strong>, capturing how efficiently this particular combination of CPU, quantization, llama.cpp implementation, and thread configuration processes the reference model.</p>
+<p>That&#39;s arguably more useful than the memory bandwidth advertised on a hardware specification sheet, because it&#39;s closer to the actual workload I want to predict.</p>
+<h3>Predicting other models</h3>
+<p>The prediction formula is:</p>
+<div class="equation">TPS<sub>estimated</sub> = 0.85 × BW<sub>effective</sub> ÷ W<sub>candidate</sub></div>
+
+<p>The additional <strong>0.85 factor</strong> is an empirical correction.</p>
+<p>When I tried the raw bandwidth formula, it was overly optimistic for some other model sizes. Multiplying by 0.85 improved the predictions on my test machine while keeping them reasonably conservative.</p>
+<p>Here&#39;s how it performed against actual measurements:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th align="right">Predicted</th>
+<th align="right">Measured</th>
+<th align="right">Error</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Qwen3-0.6B</td>
+<td align="right">55.0 tok/s</td>
+<td align="right">51.8 tok/s</td>
+<td align="right">+6%</td>
+</tr>
+<tr>
+<td>Qwen3-4B</td>
+<td align="right">14.1 tok/s</td>
+<td align="right">13.3 tok/s</td>
+<td align="right">+6%</td>
+</tr>
+<tr>
+<td>Qwen3-8B</td>
+<td align="right">7.0 tok/s</td>
+<td align="right">7.9 tok/s</td>
+<td align="right">−11%</td>
+</tr>
+</tbody></table>
+<figure class="blog-figure"><img src="../assets/localinferos-predicted-vs-measured.png?v=2" alt="Bar chart comparing predicted and measured generation speed for three Qwen3 models"><figcaption>Figure 2: Predicted versus measured generation throughput for three Qwen3 models.</figcaption></figure>
+
+<p>The signed error is calculated as:</p>
+<div class="equation">Error = (TPS<sub>predicted</sub> − TPS<sub>measured</sub>) ÷ TPS<sub>measured</sub> × 100%</div>
+
+<p>The predictions were within approximately <strong>11–12% of measured throughput</strong> for these three models.</p>
+<p>Considering that I&#39;m using a single reference model and a relatively simple formula, I was pretty happy with that.</p>
+<p>However, there are some important caveats.</p>
+<p>First, the correction factor was calibrated on this particular Intel CPU. There&#39;s no guarantee that it will perform equally well on an AMD processor, an older laptop, or a workstation with a different memory architecture.</p>
+<p>Second, the same small set of models helped motivate the correction factor and evaluate it. This is a calibration result, not an independent held-out evaluation.</p>
+<p>A proper assessment would require testing additional architectures, quantization formats, and CPUs using separate calibration and validation data.</p>
+<h3>Why the predictions aren&#39;t perfect</h3>
+<p>Not all inference time is spent reading model weights.</p>
+<p>There&#39;s also attention computation, KV-cache access, per-layer overhead, thread synchronization, and quantization-kernel behavior.</p>
+<p>For smaller models, fixed costs account for a larger fraction of total execution time, making simple weight-size extrapolation less accurate.</p>
+<p>As conversations become longer, the growing KV cache can also reduce generation throughput.</p>
+<p>The predictor also isn&#39;t suitable for mixture-of-experts models without modification.</p>
+<p>An MoE model may store tens of billions of parameters but activate only a fraction of them during each token&#39;s computation. Consequently, its total GGUF size isn&#39;t a good approximation of the weights accessed per token.</p>
+<p>For now, LocalInferOS uses this estimator for supported dense models.</p>
+<hr>
+<h2>4. Will the Model Actually Fit in RAM?</h2>
+<p>Predicting 30 tokens/sec is rather pointless if the machine doesn&#39;t have enough memory to load the model.</p>
+<p>The GGUF file size gives us a starting point, but inference requires additional memory for the KV cache, working buffers, the kernel, llama.cpp, and the Rust interface.</p>
+<p>LocalInferOS uses an initial approximation:</p>
+<div class="equation">RAM<sub>required</sub> ≈ 1.2 × Model size + 1 GiB</div>
+
+<p>The additional 20% provides an approximate allowance for model-related runtime overhead, including the KV cache for a modest context length around 4096 tokens.</p>
+<p>The extra 1 GiB reserves space for the operating system and other runtime allocations.</p>
+<p>This isn&#39;t an exact upper bound. KV-cache memory varies significantly with model architecture, context length, and cache data type.</p>
+<p>One design choice is that <strong>the predictor compares this estimate against total RAM, not currently available RAM</strong>.</p>
+<p>Because LocalInferOS is such a minimal environment, there&#39;s usually very little else consuming memory. Total physical RAM therefore provides a useful first approximation.</p>
+<p>Models that exceed the estimated memory limit are flagged as potentially unsuitable.</p>
+<p>The user can still force the download if they want to experiment, but the model may load slowly, perform poorly, or fail.</p>
+<p>The recommendation table primarily uses two signals:</p>
+<ol>
+<li>Estimated generation throughput.</li>
+<li>Estimated RAM requirements.</li>
+</ol>
+<p>USB storage availability is checked separately when the user actually runs <code>/download</code>.</p>
+<hr>
+<h2>5. Saving Hardware Profiles on the USB</h2>
+<p>Benchmarking the same hardware every time you boot would be rather annoying.</p>
+<p>After profiling, LocalInferOS saves the result to:</p>
+<p><code>/data/config/profile.json</code></p>
+<p>An example:</p>
+<pre><code class="language-json">{
+  &quot;cpu&quot;: &quot;13th Gen Intel(R) Core(TM) i7-13650HX&quot;,
+  &quot;cpu_threads&quot;: 20,
+  &quot;ram_bytes&quot;: 10426146816,
+  &quot;best_threads&quot;: 6,
+  &quot;tokens_per_sec&quot;: 32.4,
+  &quot;bandwidth&quot;: 41372369845
+}
+</code></pre>
+<p>The saved profile can populate the recommendations table immediately on subsequent boots.</p>
+<p>However, because portability is a major part of the project, a profile is only valid for the hardware and inference configuration it describes.</p>
+<p>If I move the USB to another laptop, LocalInferOS needs to reprofile that machine rather than blindly reusing the previous laptop&#39;s performance measurements.</p>
+<hr>
+<h2>6. Building an Operating System That Does Almost Nothing</h2>
+<p>Now for the operating-system side of things.</p>
+<p>I didn&#39;t write a Linux kernel from scratch. Instead, I took an Ubuntu-packaged Linux kernel and built a minimal userspace around it.</p>
+<p>The major components are:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Ubuntu Linux kernel</td>
+<td>Hardware, memory and process management</td>
+</tr>
+<tr>
+<td>BusyBox</td>
+<td>Minimal shell and Unix utilities</td>
+</tr>
+<tr>
+<td>GRUB</td>
+<td>UEFI bootloader</td>
+</tr>
+<tr>
+<td>initramfs</td>
+<td>Initial RAM-backed filesystem</td>
+</tr>
+<tr>
+<td>llama.cpp</td>
+<td>GGUF inference and model management</td>
+</tr>
+<tr>
+<td>Rust + Ratatui</td>
+<td>Terminal user interface</td>
+</tr>
+<tr>
+<td>ext4</td>
+<td>Persistent data storage</td>
+</tr>
+</tbody></table>
+<p>No desktop environment, no systemd, no package manager, and no unnecessary background services.</p>
+<p>The compressed initramfs is approximately <strong>18 MB</strong>, expanding to about <strong>43 MB in RAM</strong>. That already includes the required kernel module tree.</p>
+<p>The kernel and bundled GGUF model are separate from that 18 MB figure.</p>
+<h3>How the USB actually boots</h3>
+<p>The USB contains two partitions.</p>
+<p><strong>Partition 1: <code>LIO_BOOT</code> (FAT32)</strong></p>
+<p>Contains the UEFI bootloader, Linux kernel, and initramfs.</p>
+<p><strong>Partition 2: <code>LIO_DATA</code> (ext4)</strong></p>
+<p>Contains the bundled default GGUF, downloaded model cache, conversation history, and configuration files.</p>
+<p>The overall boot sequence looks like this:</p>
+<pre><code class="language-text">Power on laptop
+        |
+        v
+UEFI firmware
+        |
+        v
+GRUB
+        |
+        v
+Linux kernel + initramfs
+        |
+        v
+/init (PID 1)
+        |
+        +-- Mount /proc, /sys, /dev
+        |
+        +-- Load USB/SATA drivers
+        |
+        +-- Mount LIO_DATA at /data
+        |
+        +-- Ethernet + DHCP
+        |
+        v
+LocalInferOS Rust TUI
+        |
+        +-- Start llama-server (router)
+        |
+        +-- Profile hardware on first boot
+        |
+        +-- Recommend models
+        |
+        +-- Download or select a model
+        |
+        v
+Chat!
+</code></pre>
+<figure class="blog-figure"><img src="../assets/localinferos-usb-boot-architecture.png?v=2" alt="Diagram of the LocalInferOS UEFI boot sequence and persistent USB partitions"><figcaption>Figure 3: USB partition architecture and boot sequence.</figcaption></figure>
+
+<p>The UEFI firmware finds GRUB on the USB, and GRUB loads the kernel and initramfs into memory.</p>
+<p>The kernel then starts <code>/init</code>, which is a small shell script responsible for initializing the environment.</p>
+<p>Once the required filesystems and devices are available, <code>/init</code> launches the Rust TUI.</p>
+<p>The operating system runs primarily from RAM, while persistent data remains on the USB.</p>
+<p>The GGUF weights are read or memory-mapped from USB storage and brought into RAM as needed. The CPU performs inference using those weights.</p>
+<h3>Why FAT32 and ext4?</h3>
+<p>FAT32 is used for the UEFI boot partition because it&#39;s the conventional filesystem supported by UEFI firmware.</p>
+<p>The data partition uses ext4 because it&#39;s a native Linux filesystem and supports files larger than FAT32&#39;s 4 GiB per-file limit.</p>
+<p>That last point is particularly important for a system designed to store multi-gigabyte LLMs.</p>
+<h3>What actually lives on the USB?</h3>
+<p>The persistent data partition has the following structure:</p>
+<pre><code class="language-text">/data/
+├── models/
+│   └── default/
+│       └── Qwen3-1.7B-Q4_K_M.gguf
+├── hf-cache/
+├── history/
+└── config/
+    └── profile.json
+</code></pre>
+<p>Each directory has a distinct role.</p>
+<p><strong><code>models/default/</code></strong> contains the pre-bundled Qwen3-1.7B reference model. This model is available without an internet connection and is also used for initial hardware profiling.</p>
+<p><strong><code>hf-cache/</code></strong> is where llama.cpp&#39;s model-management functionality maintains downloaded model files and related cache data. Instead of manually managing every download, LocalInferOS delegates this work to llama.cpp&#39;s router.</p>
+<p><strong><code>history/</code></strong> stores persistent conversation history. This is what allows the user to boot LocalInferOS on another machine and retain previous conversations.</p>
+<p><strong><code>config/profile.json</code></strong> stores the hardware profiling results, including the selected CPU thread count and calibrated inference performance.</p>
+<p>The entire data partition resides on the USB stick.</p>
+<p>Nothing needs to be installed or written to the laptop&#39;s internal drive.</p>
+<p>Naturally, switching hardware means the inference performance may change, which is exactly why the profiling system exists in the first place.</p>
+<h3>Kernel modules without a full distribution</h3>
+<p>A major difficulty with such a minimal Linux environment is that normal Linux distributions handle a lot of hardware compatibility automatically.</p>
+<p>Strip away most of the distribution, and suddenly you have to think about things like SATA drivers, USB controllers, filesystem drivers, and network adapters yourself.</p>
+<p>Initially, I was loading individual <code>.ko</code> files manually in a particular order.</p>
+<p>That quickly became inconvenient because kernel modules often depend on other modules.</p>
+<p>The current solution uses the standard Linux module infrastructure:</p>
+<ul>
+<li>At build time, <code>depmod</code> generates the dependency information.</li>
+<li>At boot, <code>/init</code> uses <code>modprobe</code> to load the necessary drivers and their dependencies.</li>
+</ul>
+<p>This keeps the init script smaller and makes it easier to add support for more hardware.</p>
+<p>It doesn&#39;t magically provide every possible driver, though. Required kernel modules and firmware still need to be included in the image.</p>
+<p>Wi-Fi is a particularly interesting challenge here. Different laptop chipsets require different drivers and firmware, so Ethernet is currently the simpler supported route for downloading models.</p>
+<h3>Testing the USB image</h3>
+<p>Early development used VirtualBox and a bootable ISO.</p>
+<p>The current approach uses <strong>QEMU with UEFI firmware</strong>, booting the USB disk image directly.</p>
+<p>This more closely resembles the real installation process because it tests the partition table, EFI bootloader, and disk filesystem layout together.</p>
+<p>The final release artifact is compressed as <code>.img.xz</code> to avoid distributing an unnecessarily large raw disk image.</p>
+<hr>
+<h2>7. Debugging Stories: When Minimal Linux Isn&#39;t So Minimal</h2>
+<p>Building a tiny Linux environment sounds simple until something breaks and you realize you&#39;ve removed most of the tools you&#39;d normally use to debug it.</p>
+<p>A few problems were particularly interesting.</p>
+<h3>Bug #1: The Download That Silently Stopped</h3>
+<p>Rather than implementing an entire Hugging Face downloader myself, LocalInferOS uses llama.cpp&#39;s server in router mode.</p>
+<p>The server already handles model downloads, caching, resuming incomplete downloads, and loading models afterward.</p>
+<p>My Rust TUI just needs to request a model and display progress.</p>
+<p>Simple enough, right?</p>
+<p>During testing under WSL, I tried downloading Qwen3-0.6B, a roughly 640 MB model.</p>
+<p>The download progressed normally until it reached <strong>263 MB</strong>.</p>
+<p>Then it stopped.</p>
+<p>No error. No timeout. No exception.</p>
+<p>Just 0 KB/s forever, while the server continued reporting that it was downloading.</p>
+<p>At the same time, <code>curl</code> could download the exact same file from Hugging Face at around 20 MB/s, so the network connection wasn&#39;t the problem.</p>
+<p>The llama.cpp download process had stalled.</p>
+<h4>Finding the fix</h4>
+<p>Restarting llama-server revealed that it recognized the model as incomplete.</p>
+<p>Requesting the same model again resumed the download from around 263 MB rather than starting over.</p>
+<p>That was useful, but forcing users to restart the inference server every time a download stalled wasn&#39;t exactly the seamless experience I had in mind.</p>
+<p>After looking through llama.cpp&#39;s source, I found a better option.</p>
+<p>Sending a request to:</p>
+<pre><code class="language-text">POST /models/unload
+</code></pre>
+<p>could cancel the ongoing download in place.</p>
+<p>Requesting the model again would then resume the incomplete download, without restarting the server.</p>
+<p>So I added a download watchdog.</p>
+<p>The Rust TUI listens to the server&#39;s download event stream and monitors the reported number of downloaded bytes.</p>
+<p>If that number doesn&#39;t increase for 30 seconds, the watchdog:</p>
+<ol>
+<li>Cancels the download.</li>
+<li>Requests the model again.</li>
+<li>Repeats if necessary, up to five retries.</li>
+</ol>
+<p>There was one catch.</p>
+<p>Cancelling the download causes the server to emit a <code>download failed</code> event.</p>
+<p>Without additional handling, the TUI would interpret its own intentional cancellation as an unexpected failure.</p>
+<p>So the watchdog tracks the cancellations it initiated and ignores the corresponding failure reports.</p>
+<p>A fairly small change, but it made downloads substantially more resilient to silent stalls.</p>
+<h4>The bug inside the bug</h4>
+<p>While investigating the stalled download, I found another issue.</p>
+<p>My HTTP client had a 30-second total request timeout.</p>
+<p>That might sound reasonable for an API call, but LLM inference isn&#39;t a typical short-lived API request.</p>
+<p>A generated response can legitimately take more than 30 seconds.</p>
+<p>With that timeout applied globally, a perfectly healthy long response could get terminated simply because the model hadn&#39;t finished generating.</p>
+<p>So the download stall needed its own <strong>inactivity watchdog</strong>, rather than a blanket 30-second timeout on every HTTP request.</p>
+<p>One more design constraint emerged: because the router was configured to keep only one model loaded at a time, loading a chat model could interfere with an active download.</p>
+<p>For now, LocalInferOS pauses chatting while a model is downloading.</p>
+<p>Not ideal, but significantly better than having downloads disappear halfway through a conversation.</p>
+<h3>Bug #2: &quot;You Need to Load the Kernel First&quot;</h3>
+<p>This one took considerably longer to understand than it should have.</p>
+<p>The first USB image successfully reached GRUB.</p>
+<p>Unfortunately, instead of booting Linux, GRUB displayed:</p>
+<pre><code class="language-text">error: you need to load the kernel first
+</code></pre>
+<p>My initial assumption was that the kernel file wasn&#39;t being found.</p>
+<p>I inspected the USB image, checked its partitions, and confirmed that <code>/boot/vmlinuz</code> was present.</p>
+<p>Everything looked correct.</p>
+<p>The boot partition was labelled <code>LIO_BOOT</code>, and the GRUB configuration was supposed to locate it by label.</p>
+<p>One theory was that FAT&#39;s space-padded volume labels were preventing the label lookup from matching correctly.</p>
+<p>So I changed GRUB to search for the kernel file directly instead.</p>
+<p>Same error.</p>
+<p>At this point, I opened the GRUB command line by pressing <code>c</code> at the boot menu.</p>
+<p>Running:</p>
+<pre><code class="language-text">grub&gt; ls
+</code></pre>
+<p>returned:</p>
+<pre><code class="language-text">(proc) (memdisk) (hd0) (cd0)
+</code></pre>
+<p>And there was the problem.</p>
+<p>GRUB could see the USB drive as <code>(hd0)</code>, but it couldn&#39;t see its partitions.</p>
+<p>For a GPT-partitioned USB drive, I expected something like:</p>
+<pre><code class="language-text">(hd0,gpt1) (hd0,gpt2)
+</code></pre>
+<p>Without access to those partitions, GRUB couldn&#39;t locate the kernel, regardless of whether I searched by label or filename.</p>
+<p>The actual cause was missing partition-table support in the standalone GRUB setup.</p>
+<p>GRUB needs the <code>part_gpt</code> module to interpret GPT partition tables and the <code>fat</code> module to read the boot filesystem.</p>
+<p>Adding these lines to the GRUB configuration fixed the problem:</p>
+<pre><code class="language-text">insmod part_gpt
+insmod fat
+</code></pre>
+<p>The lesson here was that the visible error wasn&#39;t necessarily the actual problem.</p>
+<p>&quot;You need to load the kernel first&quot; was a downstream symptom.</p>
+<p>The kernel wasn&#39;t loaded because GRUB couldn&#39;t find it.</p>
+<p>GRUB couldn&#39;t find it because it couldn&#39;t read the partitions.</p>
+<p>And it couldn&#39;t read the partitions because the relevant module wasn&#39;t available to its configuration.</p>
+<p>Sometimes the best debugging tool is simply asking the system what it can actually see.</p>
+<h3>Design Problem #3: How Do You Shut Down an OS Whose Init Is a Shell Script?</h3>
+<p>This is probably my favorite small design decision.</p>
+<p>In LocalInferOS, <code>/init</code> is a shell script running as <strong>PID 1</strong>.</p>
+<p>PID 1 is special in Linux. It&#39;s the first userspace process started by the kernel, and the system expects it to remain alive.</p>
+<p>If PID 1 exits unexpectedly, Linux can panic.</p>
+<p>My init script therefore runs the Rust TUI in a loop, restarting it when the application exits normally.</p>
+<p>But I still needed a way for the user to shut down the entire computer.</p>
+<p>I didn&#39;t want the Rust TUI to directly handle low-level shutdown operations, especially because the same application also runs during development on my regular machine.</p>
+<p>Accidentally shutting down my development laptop while testing a keyboard shortcut would be a rather unfortunate feature.</p>
+<p>So I used an extremely simple interface: <strong>process exit codes</strong>.</p>
+<p>When the user presses <code>Ctrl+Q</code>:</p>
+<ol>
+<li>The TUI stops llama-server and its model processes.</li>
+<li>It exits with the special status code <code>10</code>.</li>
+<li><code>/init</code> recognizes the code as a shutdown request.</li>
+<li>It allows model processes time to finish.</li>
+<li>It runs <code>sync</code> to flush pending writes to the USB.</li>
+<li>It unmounts <code>/data</code> cleanly, or switches to a read-only state if something still holds it open.</li>
+<li>Finally, it invokes <code>poweroff -f</code>.</li>
+</ol>
+<p>If the TUI exits normally with code <code>0</code>, such as through <code>Ctrl+C</code>, <code>/init</code> restarts it instead.</p>
+<p>Conceptually, the contract looks like this:</p>
+<pre><code class="language-text">Rust TUI exits
+       |
+       v
+/init checks exit code
+       |
+       +-- 0  -&gt; Restart TUI
+       |
+       +-- 10 -&gt; Flush data
+                 Unmount /data
+                 Power off
+</code></pre>
+<p>The neat part is that <strong>the Rust application doesn&#39;t need to know whether it&#39;s running as part of a bootable operating system</strong>.</p>
+<p>It simply exits with a status code.</p>
+<p>On a regular development machine, there is no LocalInferOS <code>/init</code> supervising it, so <code>Ctrl+Q</code> just exits the application.</p>
+<p>On the USB-booted OS, PID 1 interprets the exact same action as a shutdown request.</p>
+<p>No systemd, no D-Bus, no custom IPC protocol.</p>
+<p>Just an integer passed from one process to another.</p>
+<p>Sometimes the simplest interface really is the best one.</p>
+<hr>
+<h2>8. Why Rust for the Interface?</h2>
+<p>Because I wanted a responsive terminal UI, and because I apparently needed another excuse to write Rust.</p>
+<p>LocalInferOS uses Ratatui to render its chat interface, hardware information, model recommendations, and download progress directly in the terminal.</p>
+<p>There is no graphical desktop environment involved.</p>
+<p>Rust handles the application-level logic: launching and supervising inference processes, parsing benchmark results, monitoring download events, and saving configuration.</p>
+<p>It doesn&#39;t implement the underlying model download protocol itself; that work is delegated to llama.cpp&#39;s router.</p>
+<p>The actual LLM computation also happens in llama.cpp, so Rust isn&#39;t magically accelerating matrix multiplication.</p>
+<p>But it&#39;s a good fit for building the interface and the surrounding systems code.</p>
+<p>And, of course, there are those sweet Rustacean brownie points.</p>
+<hr>
+<h2>9. Limitations and Future Work</h2>
+<p>As much as I&#39;d like to claim that LocalInferOS is the future of computing, there are a few things it doesn&#39;t do yet.</p>
+<p><strong>CPU-only inference.</strong> GPU acceleration would be extremely useful, but supporting NVIDIA, AMD, and Intel GPUs across different laptops introduces substantial driver and backend complexity.</p>
+<p><strong>Limited Wi-Fi support.</strong> Ethernet works with supported hardware, but broad Wi-Fi compatibility requires additional chipset drivers, firmware, and authentication support.</p>
+<p><strong>UEFI x86-64 only.</strong> The current USB design targets x86-64 machines using UEFI. The unsigned bootloader also requires Secure Boot to be disabled on systems that enforce it.</p>
+<p><strong>Approximate throughput predictions.</strong> The predictor assumes dense, memory-bandwidth-dominated inference. Its correction factor was calibrated on one CPU, and the validation set is small.</p>
+<p><strong>Prompt processing isn&#39;t predicted.</strong> For longer inputs, prefill latency can be a substantial part of the total response time.</p>
+<p><strong>Thermal throttling.</strong> A short benchmark on a cool laptop may not reflect performance after several minutes of sustained inference.</p>
+<p>There are several directions I&#39;d like to explore next:</p>
+<ul>
+<li>A more accurate throughput predictor using GGML operator-level benchmarking.</li>
+<li>GPU acceleration and mixed CPU/GPU offloading.</li>
+<li>Broader Wi-Fi and hardware compatibility.</li>
+<li>Better performance prediction across different CPU architectures.</li>
+<li>More accurate RAM requirements based on each model&#39;s KV-cache configuration.</li>
+<li>A larger evaluation of predicted versus measured inference speed.</li>
+</ul>
+<p>In particular, I think the performance predictor has the most room for technically interesting improvements.</p>
+<p>The current approximation is useful, but it would be fascinating to see whether benchmarking a small set of quantized kernels could predict the throughput of unseen models more accurately across different hardware.</p>
+<hr>
+<h2>10. Final Thoughts</h2>
+<p>LocalInferOS started as a fairly simple question:</p>
+<p><strong>How much of a Linux environment can you strip away before you&#39;re left with just enough to run a local LLM?</strong></p>
+<p>It turns out, quite a lot.</p>
+<p>The result is an approximately 18 MB compressed initramfs, a Rust terminal interface, llama.cpp, and a USB stick containing everything needed for the supported setup.</p>
+<p>But the most interesting part wasn&#39;t necessarily shrinking the system.</p>
+<p>It was figuring out how to make inference adapt to the hardware available, and how to estimate model performance without downloading every candidate first.</p>
+<p>There are still plenty of limitations, and the prediction algorithm is far from universally accurate. But the initial results are encouraging.</p>
+<p>And there&#39;s something satisfying about carrying an entire local AI environment on a USB stick, plugging it into a compatible machine, and booting without installing anything on the internal drive.</p>
+<p>Is this the future of computing?</p>
+<p>Obviously. An entirely unbiased opinion from someone who spent far too much time building it.</p>
+<p><strong>GitHub:</strong> <a href="https://github.com/adixg/localinferos">github.com/adixg/localinferos</a></p>
+<p><strong>Release and build instructions:</strong> <a href="https://github.com/adixg/localinferos#readme">GitHub releases and README</a></p>
+
+        <div class="blog-actions">
+          <a href="../index.html#projects">← Back to projects</a>
+          <a href="https://github.com/adixg/localinferos" target="_blank" rel="noreferrer">↗ View LocalInferOS on GitHub</a>
+          <a href="#top">▲ Top</a>
+        </div>
+      </div>
+    </article>
+  </main>
+</div>
+</body>
+</html>
