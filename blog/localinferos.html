@@ -31,6 +31,8 @@
 <p>It then recommends models based on your machine&#39;s RAM and estimated token generation speed. You can download another model over Ethernet or stick with the bundled Qwen3-1.7B and start chatting.</p>
 <p>The interesting part is that <strong>the models, conversation history, and configuration all live on the USB stick itself</strong>. No installation on the laptop&#39;s internal SSD is needed.</p>
 <p>But how does all of this actually work?</p>
+<figure class="blog-figure blog-screenshot"><img src="../assets/localinferos-tui.png?v=2" alt="LocalInferOS terminal interface showing the detected hardware profile, model recommendations, and local chat"><figcaption>The finished TUI keeps the hardware profile, model estimates, and local chat in the same terminal interface.</figcaption></figure>
+<p>This is what the finished system looks like in practice. The top of the TUI shows the detected CPU and RAM, selected llama.cpp thread count, calibrated reference throughput, estimated bandwidth, and model recommendations. The chat remains directly below it, so the profiling logic stays visible without turning the entire system into a benchmarking dashboard.</p>
 <hr>
 <h2>1. Predicting LLM Performance Without Downloading Every Model</h2>
 <p>This was probably the most interesting part of the project.</p>
@@ -286,6 +288,8 @@
 <p>No desktop environment, no systemd, no package manager, and no unnecessary background services.</p>
 <p>The compressed initramfs is approximately <strong>18 MB</strong>, expanding to about <strong>43 MB in RAM</strong>. That already includes the required kernel module tree.</p>
 <p>The kernel and bundled GGUF model are separate from that 18 MB figure.</p>
+<figure class="blog-figure blog-screenshot"><img src="../assets/localinferos-boot.png?v=2" alt="LocalInferOS boot screen after the custom BusyBox userspace starts"><figcaption>LocalInferOS after reaching the custom userspace, before the Rust TUI takes over.</figcaption></figure>
+<p>The boot screen is intentionally uneventful. Once the kernel reaches the custom userspace, <code>/init</code> loads the required drivers, mounts the persistent data partition, configures networking, and starts the application. Keeping that process visible also made failures much easier to diagnose than they would have been behind a splash screen.</p>
 <h3>How the USB actually boots</h3>
 <p>The USB contains two partitions.</p>
 <p><strong>Partition 1: <code>LIO_BOOT</code> (FAT32)</strong></p>
@@ -558,5 +562,8 @@ insmod fat
     </article>
   </main>
 </div>
+<!-- Cloudflare Web Analytics -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "e4b08096554c470397966703f34600cf"}'></script>
+<!-- End Cloudflare Web Analytics -->
 </body>
 </html>
