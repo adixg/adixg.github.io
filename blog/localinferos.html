@@ -236,7 +236,7 @@
 </tr>
 </tbody></table>
 <p>No desktop environment, no systemd, no package manager, and no unnecessary background services. The compressed initramfs is approximately <strong>18 MB</strong>, expanding to about <strong>43 MB in RAM</strong>. That already includes the required kernel module tree. The kernel and bundled GGUF model are separate from that 18 MB figure.</p>
-<figure class="blog-figure blog-screenshot"><img src="../assets/localinferos-boot.png?v=4" alt="LocalInferOS boot screen after the custom BusyBox userspace starts"><figcaption>LocalInferOS after reaching the custom userspace, before the Rust TUI takes over.</figcaption></figure>
+<figure class="blog-figure blog-screenshot"><img src="../assets/localinferos-boot.png?v=5" alt="LocalInferOS boot screen after the custom BusyBox userspace starts"><figcaption>LocalInferOS after reaching the custom userspace, before the Rust TUI takes over.</figcaption></figure>
 
 <p>The boot screen is intentionally uneventful. Once the kernel reaches the custom userspace, <code>/init</code> loads the required drivers, mounts the persistent data partition, configures networking, and starts the application. Keeping that process visible also made failures much easier to diagnose than they would have been behind a splash screen.</p>
 <h3>How the USB actually boots</h3>
