@@ -155,7 +155,6 @@ footer span { flex: 1; color: var(--purple); }
 .blog-article > a[id] { display: block; scroll-margin-top: 14px; }
 .blog-figure { margin: 24px 0; padding: 8px; border: 2px inset var(--purple); background: var(--bg); }
 .blog-figure img { display: block; width: 100%; height: auto; }
-.blog-video video { display: block; width: 100%; height: auto; max-height: 78vh; background: var(--bg); }
 .blog-figure figcaption { padding: 8px 4px 2px; color: var(--muted); font-size: .76rem; }
 .blog-article pre, .architecture { overflow-x: auto; margin: 18px 0; padding: 16px; border: 1px solid var(--purple); color: var(--gold); background: var(--bg); line-height: 1.5; }
 .blog-article code { color: var(--gold); font-family: "IBM Plex Mono", "Courier New", monospace; }

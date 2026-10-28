@@ -32,11 +32,8 @@ But how does all of this actually work?
 
 This is what the finished system looks like in practice. The top of the TUI shows the detected CPU and RAM, selected llama.cpp thread count, calibrated reference throughput, estimated bandwidth, and model recommendations. The chat remains directly below it, so the profiling logic stays visible without turning the entire system into a benchmarking dashboard.
 
-<figure class="blog-figure blog-video">
-<video controls preload="metadata" playsinline poster="../assets/localinferos-tui.png?v=4">
-<source src="../assets/localinferos-demo.mp4" type="video/mp4">
-Your browser does not support embedded video. <a href="../assets/localinferos-demo.mp4">Download the LocalInferOS demo recording.</a>
-</video>
+<figure class="blog-figure blog-demo">
+<img src="../assets/localinferos-demo.gif" alt="Animated LocalInferOS demo showing hardware profiling, model recommendations, and the local chat interface">
 <figcaption>A working LocalInferOS demo showing the system in use.</figcaption>
 </figure>
 

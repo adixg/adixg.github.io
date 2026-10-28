@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="How Aditya Ghosh built LocalInferOS, an 18 MB Linux environment for portable, hardware-aware local LLM inference.">
   <title>LocalInferOS: Building an 18 MB Linux Environment for Portable LLM Inference | Aditya Ghosh</title>
-  <link rel="stylesheet" href="../css/styles.css?v=24">
+  <link rel="stylesheet" href="../css/styles.css?v=25">
 </head>
 <body class="blog-page" id="top">
 <div class="site-shell">
@@ -42,11 +42,8 @@
 <figure class="blog-figure blog-screenshot"><img src="../assets/localinferos-tui.png?v=4" alt="LocalInferOS terminal interface showing the detected hardware profile, model recommendations, and local chat"><figcaption>The finished TUI keeps the hardware profile, model estimates, and local chat in the same terminal interface.</figcaption></figure>
 
 <p>This is what the finished system looks like in practice. The top of the TUI shows the detected CPU and RAM, selected llama.cpp thread count, calibrated reference throughput, estimated bandwidth, and model recommendations. The chat remains directly below it, so the profiling logic stays visible without turning the entire system into a benchmarking dashboard.</p>
-<figure class="blog-figure blog-video">
-<video controls preload="metadata" playsinline poster="../assets/localinferos-tui.png?v=4">
-<source src="../assets/localinferos-demo.mp4" type="video/mp4">
-Your browser does not support embedded video. <a href="../assets/localinferos-demo.mp4">Download the LocalInferOS demo recording.</a>
-</video>
+<figure class="blog-figure blog-demo">
+<img src="../assets/localinferos-demo.gif" alt="Animated LocalInferOS demo showing hardware profiling, model recommendations, and the local chat interface">
 <figcaption>A working LocalInferOS demo showing the system in use.</figcaption>
 </figure>
 <hr>
