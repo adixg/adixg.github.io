@@ -112,7 +112,7 @@
 <td align="right">32.1 tok/s</td>
 </tr>
 </tbody></table>
-<figure class="blog-figure"><img src="../assets/localinferos-thread-scaling.png?v=4" alt="Line chart showing LocalInferOS generation throughput plateauing around six CPU threads"><figcaption>Figure 1: CPU thread count versus generation throughput.</figcaption></figure>
+<figure class="blog-figure"><img src="../assets/localinferos-thread-scaling.png?v=5" alt="Line chart showing LocalInferOS generation throughput plateauing around six CPU threads"><figcaption>Figure 1: CPU thread count versus generation throughput.</figcaption></figure>
 
 <p>Performance improves significantly between two and six threads, then more or less plateaus. My processor exposes 20 logical threads, but using all of them isn&#39;t necessary to achieve near-maximum performance for this workload. LocalInferOS therefore tests a series of thread counts rather than assuming that the maximum available count is optimal. The profiler starts with a small number of threads, increases the count, and stops after observing a slowdown. On my machine, that means it can stop after testing 2, 4, 6, and 8 threads. This is a heuristic rather than an exhaustive optimization. A noisy measurement could cause an early stop, and a later thread count might perform similarly or better.</p>
 <p>Still, it reduces profiling time substantially, with typical runs on my setup taking roughly 10–20 seconds. The chosen <code>best_threads</code> value is saved and passed to llama.cpp during normal chat inference.</p>
