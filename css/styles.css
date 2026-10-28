@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=VT323&display=swap");
+
 :root {
   --bg: #0a0812;
   --panel: #0a0812;
@@ -22,7 +24,7 @@ body {
     linear-gradient(rgba(71, 49, 95, .24) 1px, transparent 1px),
     linear-gradient(90deg, rgba(71, 49, 95, .24) 1px, transparent 1px);
   background-size: 54px 54px, 72px 72px, 36px 36px, 36px 36px;
-  font-family: "Courier New", monospace;
+  font-family: "IBM Plex Mono", "Courier New", monospace;
   font-size: 16px;
   line-height: 1.6;
 }
@@ -45,7 +47,7 @@ a:hover, a:focus-visible { color: var(--cream); background: var(--deep-purple); 
 .site-header h1 {
   margin: 0;
   color: var(--cream);
-  font: bold clamp(3.2rem, 7vw, 6rem)/.95 Georgia, serif;
+  font: 700 clamp(3.2rem, 7vw, 6rem)/.9 "Cormorant Garamond", Georgia, serif;
   letter-spacing: .03em;
   text-shadow: 4px 4px 0 var(--deep-purple), 7px 7px 0 var(--bg);
 }
@@ -58,7 +60,7 @@ a:hover, a:focus-visible { color: var(--cream); background: var(--deep-purple); 
 .sidebar, main { display: grid; gap: 10px; }
 
 .window { min-width: 0; border: 2px ridge var(--purple); background: rgba(10,8,18,.97); box-shadow: 2px 2px 0 var(--deep-purple); }
-.window-title { min-height: 24px; margin: 0; padding: 3px 7px; border-bottom: 2px ridge var(--purple); color: var(--cream); background: var(--deep-purple); font-size: .78rem; line-height: 16px; letter-spacing: .05em; }
+.window-title { min-height: 26px; margin: 0; padding: 3px 7px; border-bottom: 2px ridge var(--purple); color: var(--cream); background: var(--deep-purple); font-family: "VT323", "Courier New", monospace; font-size: 1.05rem; font-weight: 400; line-height: 18px; letter-spacing: .05em; }
 .window-title span { float: right; width: 15px; height: 15px; border: 1px outset var(--muted); text-align: center; line-height: 12px; }
 .window-content { padding: 14px; }
 .window-content p:first-child { margin-top: 0; }
@@ -121,7 +123,7 @@ hr { border: 0; border-top: 1px dashed var(--purple); }
 .badges span { min-height: 38px; padding: 4px; border: 2px outset var(--purple); color: var(--bg); background: var(--cream); font: 9px Arial,sans-serif; text-align: center; }
 .badges span:nth-child(3n + 2) { background: var(--purple); } .badges span:nth-child(3n) { background: var(--gold); }
 .contact-links a { overflow-wrap: anywhere; }
-.note { margin-top: 10px; padding: 12px; color: var(--bg); background: var(--gold); font-family: Georgia,serif; font-style: italic; transform: rotate(-1deg); }
+.note { margin-top: 10px; padding: 12px; color: var(--bg); background: var(--gold); font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.05rem; font-style: italic; font-weight: 600; transform: rotate(-1deg); }
 
 footer { margin-top: 10px; padding: 9px; border: 2px ridge var(--purple); background: var(--bg); display: flex; gap: 12px; align-items: center; justify-content: space-between; text-align: center; }
 footer a, footer small { padding: 5px 10px; border: 2px outset var(--purple); background: var(--deep-purple); }
@@ -133,7 +135,7 @@ footer span { flex: 1; color: var(--purple); }
 .blog-page .site-title { margin-top: 8px; }
 .blog-page main { margin-top: 12px; }
 .blog-article { padding: clamp(18px, 2.2vw, 28px); }
-.blog-article h1 { margin: 0; color: var(--cream); font: bold clamp(2rem, 5vw, 3.5rem)/1.08 Georgia, serif; }
+.blog-article h1 { margin: 0; color: var(--cream); font: 700 clamp(2rem, 5vw, 3.5rem)/1.02 "Cormorant Garamond", Georgia, serif; }
 .blog-article h2 { margin: 38px 0 10px; padding-bottom: 5px; border-bottom: 1px dashed var(--line); color: var(--gold); font-size: 1.15rem; text-transform: uppercase; }
 .blog-article h3 { margin: 28px 0 8px; color: var(--purple); font-size: 1rem; }
 .blog-article h4 { margin: 24px 0 8px; color: var(--gold); font-size: .92rem; }
@@ -144,11 +146,19 @@ footer span { flex: 1; color: var(--purple); }
 .blog-article hr { margin: 34px 0; border-top: 1px dashed var(--deep-purple); }
 .blog-article .dek { color: var(--cream); font-size: 1.12rem; }
 .blog-meta { margin: 14px 0 24px; color: var(--purple); font-size: .76rem; letter-spacing: .04em; }
+.blog-index { margin: 22px 0 30px; padding: 16px 18px; border: 2px ridge var(--purple); background: var(--bg); box-shadow: inset 0 0 24px rgba(71,49,95,.45); }
+.blog-index h2 { margin: 0 0 12px; padding: 0 0 6px; border-bottom: 1px dashed var(--purple); color: var(--gold); font-family: "VT323", "Courier New", monospace; font-size: 1.35rem; letter-spacing: .08em; text-transform: uppercase; }
+.blog-index ol { display: grid; grid-template-columns: 1fr; gap: 7px; margin: 0; padding-left: 28px; }
+.blog-index li { padding-left: 3px; color: var(--gold); }
+.blog-index a { color: var(--cream); }
+.blog-article h2[id] { scroll-margin-top: 14px; }
+.blog-article > a[id] { display: block; scroll-margin-top: 14px; }
 .blog-figure { margin: 24px 0; padding: 8px; border: 2px inset var(--purple); background: var(--bg); }
 .blog-figure img { display: block; width: 100%; height: auto; }
+.blog-video video { display: block; width: 100%; height: auto; max-height: 78vh; background: var(--bg); }
 .blog-figure figcaption { padding: 8px 4px 2px; color: var(--muted); font-size: .76rem; }
 .blog-article pre, .architecture { overflow-x: auto; margin: 18px 0; padding: 16px; border: 1px solid var(--purple); color: var(--gold); background: var(--bg); line-height: 1.5; }
-.blog-article code { color: var(--gold); font-family: "Courier New", monospace; }
+.blog-article code { color: var(--gold); font-family: "IBM Plex Mono", "Courier New", monospace; }
 .blog-article p code, .blog-article li code { padding: 1px 4px; border: 1px solid var(--deep-purple); background: var(--bg); }
 .blog-article table { width: 100%; margin: 18px 0 26px; border-collapse: collapse; font-size: .88rem; }
 .blog-article th, .blog-article td { padding: 8px 10px; border: 1px solid var(--deep-purple); text-align: left; }
