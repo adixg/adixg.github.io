@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="How Aditya Ghosh built LocalInferOS, an 18 MB Linux environment for portable, hardware-aware local LLM inference.">
   <title>LocalInferOS: Building an 18 MB Linux Environment for Portable LLM Inference | Aditya Ghosh</title>
-  <link rel="stylesheet" href="../css/styles.css?v=25">
+  <link rel="stylesheet" href="../css/styles.css?v=26">
 </head>
 <body class="blog-page" id="top">
 <div class="site-shell">
@@ -39,11 +39,12 @@
 <p>The way it works is fairly simple. You download the <code>.img.xz</code> file from the GitHub releases, decompress it, flash the image onto your USB stick, plug it into your machine, and boot straight into LocalInferOS. Instructions for building the image yourself are also provided in the README, for those who are a little extra paranoid about the man upstairs stealing their data to train AI models that&#39;ll eventually replace them. Jkjk (mostly).</p>
 <p>Once you&#39;re in, LocalInferOS profiles your hardware, benchmarks the bundled Qwen3-1.7B model, and uses the results to estimate how fast other local LLMs would run on your machine. It then recommends models based on your machine&#39;s RAM and estimated token generation speed. You can download another model over Ethernet or stick with the bundled Qwen3-1.7B and start chatting. The interesting part is that <strong>the models, conversation history, and configuration all live on the USB stick itself</strong>. No installation on the laptop&#39;s internal SSD is needed.</p>
 <p>But how does all of this actually work?</p>
-<figure class="blog-figure blog-screenshot"><img src="../assets/localinferos-tui.png?v=4" alt="LocalInferOS terminal interface showing the detected hardware profile, model recommendations, and local chat"><figcaption>The finished TUI keeps the hardware profile, model estimates, and local chat in the same terminal interface.</figcaption></figure>
-
 <p>This is what the finished system looks like in practice. The top of the TUI shows the detected CPU and RAM, selected llama.cpp thread count, calibrated reference throughput, estimated bandwidth, and model recommendations. The chat remains directly below it, so the profiling logic stays visible without turning the entire system into a benchmarking dashboard.</p>
 <figure class="blog-figure blog-demo">
-<img src="../assets/localinferos-demo.gif" alt="Animated LocalInferOS demo showing hardware profiling, model recommendations, and the local chat interface">
+<video controls autoplay muted loop playsinline preload="metadata" aria-label="LocalInferOS demo showing hardware profiling, model recommendations, and the local chat interface">
+<source src="../assets/localinferos-demo.mp4" type="video/mp4">
+Your browser does not support embedded video. <a href="../assets/localinferos-demo.mp4">Download the silent LocalInferOS demo.</a>
+</video>
 <figcaption>A working LocalInferOS demo showing the system in use.</figcaption>
 </figure>
 <hr>
@@ -360,6 +361,7 @@ Conceptually, the contract looks like this:</p>
 <p>LocalInferOS started with a fairly simple question: <strong>how much of a Linux environment can you strip away before you&#39;re left with just enough to run a local LLM?</strong> It turns out, quite a lot.</p>
 <p>The 18 MB initramfs is satisfying, but the more interesting part was making inference adapt to whatever hardware happens to boot the USB. The predictor is still approximate and the supported hardware is deliberately narrow, but the initial results are encouraging.</p>
 <p>And there is something fun about carrying an entire local AI environment on a USB stick, plugging it into a compatible machine, and chatting without installing anything on the internal drive. Is this the future of computing? Obviously. An entirely unbiased opinion from someone who spent far too much time building it.</p>
+<figure class="blog-figure blog-screenshot"><img src="../assets/localinferos-tui.png?v=4" alt="LocalInferOS terminal interface showing the detected hardware profile, model recommendations, and local chat"><figcaption>The finished TUI keeps the hardware profile, model estimates, and local chat in the same terminal interface.</figcaption></figure>
 <p><strong>GitHub:</strong> <a href="https://github.com/adixg/localinferos">github.com/adixg/localinferos</a></p>
 <p><strong>Release and build instructions:</strong> <a href="https://github.com/adixg/localinferos#readme">GitHub releases and README</a></p>
 
