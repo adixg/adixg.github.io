@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 500" width="820" height="500" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+<title id="t">TTS on the home server's CPU: seconds per 10 s of speech by RAM</title>
+<desc id="d">Kitten mini: 6.4 s · 540 MiB · n=50; Kitten nano 1.6x (live): 2.9 s · 250 MiB · n=50; Kokoro-ONNX fp32: 4.3 s · 653 MiB · n=50; Kokoro-ONNX int8: 11.9 s · 468 MiB · n=50; VITS: 4.9 s · 2.0 GB · n=50</desc>
+<rect width="820" height="500" fill="#1a1a19"/>
+<text x="84" y="30" font-size="16" font-weight="600" fill="#ffffff">TTS on the home server's CPU: seconds per 10 s of speech by RAM</text>
+<circle cx="90.0" cy="54.0" r="6" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<text x="102" y="58" font-size="12.5" fill="#c3c2b7">Intel i5-10300H, 8 threads</text>
+<line x1="84" x2="790" y1="424.0" y2="424.0" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="428.0" font-size="12" text-anchor="end" fill="#c3c2b7">0 s</text>
+<line x1="84" x2="790" y1="374.8" y2="374.8" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="378.8" font-size="12" text-anchor="end" fill="#c3c2b7">2 s</text>
+<line x1="84" x2="790" y1="325.5" y2="325.5" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="329.5" font-size="12" text-anchor="end" fill="#c3c2b7">4 s</text>
+<line x1="84" x2="790" y1="276.3" y2="276.3" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="280.3" font-size="12" text-anchor="end" fill="#c3c2b7">6 s</text>
+<line x1="84" x2="790" y1="227.1" y2="227.1" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="231.1" font-size="12" text-anchor="end" fill="#c3c2b7">8 s</text>
+<line x1="84" x2="790" y1="177.8" y2="177.8" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="181.8" font-size="12" text-anchor="end" fill="#c3c2b7">10 s</text>
+<line x1="84" x2="790" y1="128.6" y2="128.6" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="132.6" font-size="12" text-anchor="end" fill="#c3c2b7">12 s</text>
+<line x1="84" x2="790" y1="424" y2="424" stroke="#55544f"/>
+<line x1="84.0" x2="84.0" y1="424" y2="429" stroke="#55544f"/>
+<text x="84.0" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">200 MiB</text>
+<line x1="322.9" x2="322.9" y1="424" y2="429" stroke="#55544f"/>
+<text x="322.9" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">500 MiB</text>
+<line x1="509.8" x2="509.8" y1="424" y2="429" stroke="#55544f"/>
+<text x="509.8" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">1 GB</text>
+<line x1="690.5" x2="690.5" y1="424" y2="429" stroke="#55544f"/>
+<text x="690.5" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">2 GB</text>
+<text x="437.0" y="468" font-size="12.5" text-anchor="middle" fill="#c3c2b7">peak RAM of the engine process (log scale)</text>
+<text x="790" y="94" font-size="11.5" text-anchor="end" fill="#c3c2b7">lower is faster, further left is lighter · below 10 s is faster than realtime</text>
+<circle cx="343.2" cy="266.5" r="6" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="142.0" cy="352.1" r="6" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="392.6" cy="319.3" r="6" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="305.5" cy="132.0" r="6" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="694.9" cy="302.4" r="6" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<text x="355.2" y="270.5" font-size="12.5" font-weight="600" text-anchor="start" fill="#ffffff">Kitten mini</text>
+<text x="355.2" y="285.5" font-size="11.5" text-anchor="start" fill="#c3c2b7">6.4 s · 540 MiB · n=50</text>
+<text x="154.0" y="356.1" font-size="12.5" font-weight="600" text-anchor="start" fill="#ffffff">Kitten nano 1.6x (live)</text>
+<text x="154.0" y="371.1" font-size="11.5" text-anchor="start" fill="#c3c2b7">2.9 s · 250 MiB · n=50</text>
+<text x="404.6" y="323.3" font-size="12.5" font-weight="600" text-anchor="start" fill="#ffffff">Kokoro-ONNX fp32</text>
+<text x="404.6" y="338.3" font-size="11.5" text-anchor="start" fill="#c3c2b7">4.3 s · 653 MiB · n=50</text>
+<text x="317.5" y="136.0" font-size="12.5" font-weight="600" text-anchor="start" fill="#ffffff">Kokoro-ONNX int8</text>
+<text x="317.5" y="151.0" font-size="11.5" text-anchor="start" fill="#c3c2b7">11.9 s · 468 MiB · n=50</text>
+<text x="694.9" y="276.4" font-size="12.5" font-weight="600" text-anchor="middle" fill="#ffffff">VITS</text>
+<text x="694.9" y="291.4" font-size="11.5" text-anchor="middle" fill="#c3c2b7">4.9 s · 2.0 GB · n=50</text>
+</svg>

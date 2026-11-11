@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 500" width="820" height="500" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+<title id="t">TTS on a GPU: seconds per 10 s of speech by VRAM</title>
+<desc id="d">VITS: 0.4 s · ≥585 MiB · n=50; Kokoro PyTorch: 0.4 s · 977 MiB · n=50; Chatterbox Nano (RTX 4060): 3.9 s · 1.8 GB · n=3; Chatterbox Nano (GTX 1650): 2.8 s · 2.2 GB · n=50; Chatterbox Turbo (RTX 4060): 5.7 s · 2.7 GB · n=3; Chatterbox Turbo (GTX 1650): 4.6 s · 3.1 GB · n=50</desc>
+<rect width="820" height="500" fill="#1a1a19"/>
+<text x="84" y="30" font-size="16" font-weight="600" fill="#ffffff">TTS on a GPU: seconds per 10 s of speech by VRAM</text>
+<rect x="84.0" y="48.0" width="12" height="12" rx="2" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="102" y="58" font-size="12.5" fill="#c3c2b7">GTX 1650, 4 GB</text>
+<path d="M235.4,46.5 L242.9,59.5 L227.9,59.5 Z" fill="#199e70" stroke="#1a1a19" stroke-width="2" stroke-linejoin="round"/>
+<text x="247.39999999999998" y="58" font-size="12.5" fill="#c3c2b7">RTX 4060, 8 GB</text>
+<line x1="84" x2="790" y1="424.0" y2="424.0" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="428.0" font-size="12" text-anchor="end" fill="#c3c2b7">0 s</text>
+<line x1="84" x2="790" y1="378.3" y2="378.3" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="382.3" font-size="12" text-anchor="end" fill="#c3c2b7">1 s</text>
+<line x1="84" x2="790" y1="332.6" y2="332.6" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="336.6" font-size="12" text-anchor="end" fill="#c3c2b7">2 s</text>
+<line x1="84" x2="790" y1="286.9" y2="286.9" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="290.9" font-size="12" text-anchor="end" fill="#c3c2b7">3 s</text>
+<line x1="84" x2="790" y1="241.1" y2="241.1" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="245.1" font-size="12" text-anchor="end" fill="#c3c2b7">4 s</text>
+<line x1="84" x2="790" y1="195.4" y2="195.4" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="199.4" font-size="12" text-anchor="end" fill="#c3c2b7">5 s</text>
+<line x1="84" x2="790" y1="149.7" y2="149.7" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="153.7" font-size="12" text-anchor="end" fill="#c3c2b7">6 s</text>
+<line x1="84" x2="790" y1="104.0" y2="104.0" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="108.0" font-size="12" text-anchor="end" fill="#c3c2b7">7 s</text>
+<line x1="84" x2="790" y1="424" y2="424" stroke="#55544f"/>
+<line x1="84.0" x2="84.0" y1="424" y2="429" stroke="#55544f"/>
+<text x="84.0" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">200 MiB</text>
+<line x1="249.4" x2="249.4" y1="424" y2="429" stroke="#55544f"/>
+<text x="249.4" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">500 MiB</text>
+<line x1="378.7" x2="378.7" y1="424" y2="429" stroke="#55544f"/>
+<text x="378.7" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">1 GB</text>
+<line x1="503.8" x2="503.8" y1="424" y2="429" stroke="#55544f"/>
+<text x="503.8" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">2 GB</text>
+<line x1="628.9" x2="628.9" y1="424" y2="429" stroke="#55544f"/>
+<text x="628.9" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">4 GB</text>
+<line x1="754.0" x2="754.0" y1="424" y2="429" stroke="#55544f"/>
+<text x="754.0" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">8 GB</text>
+<text x="437.0" y="468" font-size="12.5" text-anchor="middle" fill="#c3c2b7">VRAM in use on the card during the run (log scale)</text>
+<text x="790" y="94" font-size="11.5" text-anchor="end" fill="#c3c2b7">lower is faster, further left is lighter</text>
+<line x1="628.9" x2="628.9" y1="104" y2="424" stroke="#c3c2b7" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="622.9" y="118" font-size="11.5" text-anchor="end" fill="#c3c2b7">GTX 1650 limit</text>
+<line x1="754.0" x2="754.0" y1="104" y2="424" stroke="#c3c2b7" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="748.0" y="118" font-size="11.5" text-anchor="end" fill="#c3c2b7">RTX 4060 limit</text>
+<rect x="271.7" y="399.9" width="12" height="12" rx="2" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<rect x="364.3" y="397.6" width="12" height="12" rx="2" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<path d="M486.2,236.5 L493.7,249.5 L478.7,249.5 Z" fill="#199e70" stroke="#1a1a19" stroke-width="2" stroke-linejoin="round"/>
+<rect x="512.5" y="291.1" width="12" height="12" rx="2" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<path d="M560.6,155.3 L568.1,168.3 L553.1,168.3 Z" fill="#199e70" stroke="#1a1a19" stroke-width="2" stroke-linejoin="round"/>
+<rect x="576.8" y="207.1" width="12" height="12" rx="2" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="281.7" y="379.9" font-size="12.5" font-weight="600" text-anchor="end" fill="#ffffff">VITS</text>
+<text x="281.7" y="394.9" font-size="11.5" text-anchor="end" fill="#c3c2b7">0.4 s · ≥585 MiB · n=50</text>
+<text x="366.3" y="377.6" font-size="12.5" font-weight="600" text-anchor="start" fill="#ffffff">Kokoro PyTorch</text>
+<text x="366.3" y="392.6" font-size="11.5" text-anchor="start" fill="#c3c2b7">0.4 s · 977 MiB · n=50</text>
+<text x="474.2" y="260.0" font-size="12.5" font-weight="600" text-anchor="end" fill="#ffffff">Chatterbox Nano (RTX 4060)</text>
+<text x="474.2" y="275.0" font-size="11.5" text-anchor="end" fill="#c3c2b7">3.9 s · 1.8 GB · n=3</text>
+<text x="506.5" y="301.1" font-size="12.5" font-weight="600" text-anchor="end" fill="#ffffff">Chatterbox Nano (GTX 1650)</text>
+<text x="506.5" y="316.1" font-size="11.5" text-anchor="end" fill="#c3c2b7">2.8 s · 2.2 GB · n=50</text>
+<text x="564.6" y="136.8" font-size="12.5" font-weight="600" text-anchor="end" fill="#ffffff">Chatterbox Turbo (RTX 4060)</text>
+<text x="564.6" y="151.8" font-size="11.5" text-anchor="end" fill="#c3c2b7">5.7 s · 2.7 GB · n=3</text>
+<text x="570.8" y="217.1" font-size="12.5" font-weight="600" text-anchor="end" fill="#ffffff">Chatterbox Turbo (GTX 1650)</text>
+<text x="570.8" y="232.1" font-size="11.5" text-anchor="end" fill="#c3c2b7">4.6 s · 3.1 GB · n=50</text>
+</svg>

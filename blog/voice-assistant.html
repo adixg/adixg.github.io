@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="How Aditya Ghosh built self-hosted inference infrastructure for an ESP32 voice assistant using k3s, GPU failover, distributed tracing, and model benchmarks.">
+  <title>Building My Own Inference Infrastructure: Kubernetes, GPU Failover, and Benchmarking | Aditya Ghosh</title>
+  <link rel="stylesheet" href="../css/styles.css?v=27">
+</head>
+<body class="blog-page" id="top">
+<div class="site-shell">
+  <header class="site-header">
+    <h1>Aditya Ghosh</h1>
+    <p class="site-title">PROJECT LOG</p>
+    <p><a href="../index.html#projects">← Back to portfolio</a></p>
+  </header>
+  <main>
+    <article class="window">
+      <h2 class="window-title">▤ BLOG/VOICE-ASSISTANT.TXT <span>×</span></h2>
+      <div class="blog-article">
+        <h1>Building My Own Inference Infrastructure: Kubernetes, GPU Failover, and Benchmarking</h1>
+        <p class="dek">Part 1 — Building a Self-Hosted AI Voice Assistant</p>
+        <p class="blog-meta">PROJECT LOG · ML SYSTEMS · KUBERNETES / ESP32 / LOCAL INFERENCE</p>
+<nav class="blog-index" aria-label="Article index">
+<h2>Index</h2>
+<ol>
+<li><a href="#section-01">01 — The Architecture</a></li>
+<li><a href="#section-02">02 — Building a Custom Kubernetes Controller</a></li>
+<li><a href="#section-03">03 — Distributed Tracing and Observability</a></li>
+<li><a href="#section-04">04 — Benchmarking Speech-to-Text Models</a></li>
+<li><a href="#section-05">05 — Benchmarking Text-to-Speech Models</a></li>
+<li><a href="#section-06">06 — What I've Learned and What's Next</a></li>
+</ol>
+</nav>
+
+<p>Turns out my RTX 4060 and GTX 1650 aren&#39;t exactly an NVIDIA data center, but that hasn&#39;t stopped me from treating them like one.</p>
+<p>Over the past few months, I&#39;ve been building my own voice assistant using a tiny ESP32-S3, my personal laptop, and an old laptop that I use as a home server.</p>
+<p>The original idea was pretty simple: I wanted to build something similar to a Google Home or Alexa, except with locally hosted models and the ability to customize practically everything.</p>
+<p>Somehow, this turned into a Kubernetes cluster, a custom GPU failover controller, an entire observability stack, and a LOT of benchmarking. A perfectly reasonable amount of infrastructure for something I could have just opened ChatGPT for.</p>
+<p>This is Part 1 of a two-part series about the project. Here, I&#39;ll focus on how I distributed the inference workloads across my hardware, built the Kubernetes controller, and used benchmarking and distributed tracing to make the system more responsive.</p>
+<p>In Part 2, I&#39;ll get into the actual voice assistant: how the ESP32 communicates with my laptops, the voice interaction pipeline, and how I gave it access to the internet and other tools.</p>
+<div class="blog-gallery blog-gallery-three" aria-label="Voice assistant device modes">
+<figure class="blog-figure"><img src="../assets/voice-assistant-idle.png" alt="Rina-chan pixel-art assistant face on the M5StickS3 display"><figcaption>Assistant</figcaption></figure>
+<figure class="blog-figure"><img src="../assets/voice-assistant-clock.png" alt="M5StickS3 displaying the digital clock mode"><figcaption>Clock</figcaption></figure>
+<figure class="blog-figure"><img src="../assets/voice-assistant-pomodoro.jpg" alt="M5StickS3 displaying a 50-minute pomodoro timer"><figcaption>Pomodoro</figcaption></figure>
+</div>
+
+<p><a id="section-01"></a></p>
+<h2>01 — The Architecture</h2>
+<p>The assistant itself runs on an M5StickS3, a tiny ESP32-S3 device with a microphone, speaker, and display.</p>
+<p>I implemented an on-device wake-word detector using microWakeWord, so saying &quot;Assistant&quot; activates it without needing to press any buttons. Once it detects that I&#39;ve finished speaking, it sends the audio over Bluetooth Low Energy (BLE) to my Android phone, which acts as a relay to the backend.</p>
+<p>The backend runs on a lightweight Kubernetes distribution called <strong>k3s</strong>, with three main components:</p>
+<ol>
+<li><strong>Speech-to-text (STT):</strong> Moonshine converts my speech into text.</li>
+<li><strong>LLM inference:</strong> Qwen processes the request using llama.cpp.</li>
+<li><strong>Text-to-speech (TTS):</strong> KittenTTS converts the response back into audio.</li>
+</ol>
+<p>The STT, agent, and TTS services run on my always-on home server. The LLM backend depends on which GPU is available.</p>
+<table>
+<thead>
+<tr>
+<th>Hardware</th>
+<th>GPU</th>
+<th>Model</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Personal laptop</td>
+<td>RTX 4060</td>
+<td>Qwen3-8B</td>
+<td>Preferred LLM backend</td>
+</tr>
+<tr>
+<td>Home server</td>
+<td>GTX 1650</td>
+<td>Qwen3.5-4B</td>
+<td>Fallback LLM backend</td>
+</tr>
+</tbody></table>
+<pre class="architecture" aria-label="Overall voice assistant architecture">M5StickS3
+wake word · microphone · speaker
+        │ BLE
+        ▼
+Android relay
+BLE central · WebSocket client
+        │ WebSocket over Tailscale
+        ▼
+k3s gateway
+   ├── Moonshine STT ── CPU
+   ├── Agent + MCP tools
+   │      ├── Qwen3-8B ───── RTX 4060 (preferred)
+   │      └── Qwen3.5-4B ─── GTX 1650 (fallback)
+   └── KittenTTS ─────── CPU</pre>
+
+<p>The main constraint here is that my personal laptop isn&#39;t always available. Sometimes I&#39;m using it elsewhere, sometimes it&#39;s switched off, and sometimes it simply disconnects from the cluster.</p>
+<p>I didn&#39;t want my voice assistant to stop working every time that happened.</p>
+<p>I also didn&#39;t want to keep the fallback model loaded on my home server unnecessarily, since that machine only has a GTX 1650 with 4 GB of VRAM.</p>
+<p>This was what led me to build my own Kubernetes controller.</p>
+<p><a id="section-02"></a></p>
+<h2>02 — Building a Custom Kubernetes Controller</h2>
+<p>Kubernetes already handles things like scheduling pods, restarting failed containers, and maintaining deployment state.</p>
+<p>However, my problem was slightly different.</p>
+<p>I needed the assistant to prefer the more powerful RTX 4060 when my laptop was available, automatically switch to the GTX 1650 when it wasn&#39;t, and reclaim resources on my home server when the RTX 4060 came back online.</p>
+<p>So I wrote a custom controller called <code>gpu-scheduler</code>.</p>
+<h3>How it works</h3>
+<p>The controller follows Kubernetes&#39; reconciliation pattern. Instead of reacting to an event and assuming everything worked, it repeatedly checks the current state of the cluster and tries to bring it in line with the desired configuration.</p>
+<p>In my implementation, it reconciles every 10 seconds and also reacts to events involving the RTX 4060 node.</p>
+<p>There are two main scenarios.</p>
+<p><strong>Scenario 1: My laptop is online</strong></p>
+<p>The controller checks whether the RTX 4060 node is <code>Ready</code> and whether its llama.cpp inference server is actually available.</p>
+<p>If both conditions are satisfied, it configures the agent to use Qwen3-8B on the RTX 4060.</p>
+<p>Once the agent rollout has completed and the RTX 4060 has remained available for 60 seconds, the controller scales the GTX 1650 standby deployment down to zero.</p>
+<p>This frees approximately <strong>1 GiB of RAM and 3.4 GiB of VRAM</strong> on the home server.</p>
+<p>The 60-second stability window is important because I don&#39;t want a laptop that briefly disconnects and reconnects to cause unnecessary model reloads.</p>
+<p><strong>Scenario 2: My laptop goes offline</strong></p>
+<p>If the RTX 4060 node becomes unavailable or its inference server stops responding, the controller scales the GTX 1650 deployment back up.</p>
+<p>However, starting a pod doesn&#39;t necessarily mean the model is ready for inference.</p>
+<p>The controller waits until the fallback backend reports that it is ready before updating the agent&#39;s inference endpoint to Qwen3.5-4B.</p>
+<pre class="architecture" aria-label="Kubernetes GPU controller reconciliation flow">Every 10 seconds or on an RTX 4060 node event
+                         │
+                         ▼
+         Is the node Ready and llama.cpp available?
+                    ┌────┴────┐
+                   yes        no
+                    │          │
+          point agent to       scale GTX 1650 up
+          Qwen3-8B             and wait for readiness
+                    │          │
+          stable for 60 s?     point agent to
+                    │          Qwen3.5-4B
+                    ▼
+          scale standby to zero</pre>
+
+<h3>The tradeoff: cold versus warm standby</h3>
+<p>Here&#39;s where things get interesting.</p>
+<p>Starting the fallback deployment from zero requires loading the model into memory, initializing the inference server, and waiting for readiness.</p>
+<p>I measured approximately <strong>61 seconds for the cold fallback to become ready</strong>, excluding the additional time Kubernetes may take to detect that the laptop has disappeared.</p>
+<p>That&#39;s obviously not ideal if I&#39;m in the middle of a conversation.</p>
+<p>An alternative is to keep the GTX 1650 model running in the background. That makes failover much faster, but permanently occupies RAM and VRAM on my already resource-constrained home server.</p>
+<p>I ended up supporting both modes:</p>
+<ul>
+<li><strong>Cold standby:</strong> Saves memory when the RTX 4060 is available, at the cost of slower failover.</li>
+<li><strong>Warm standby:</strong> Keeps the fallback model loaded for faster recovery, at the cost of additional resource consumption.</li>
+</ul>
+<p>There is also a limitation worth mentioning: switching inference backends patches the agent&#39;s Kubernetes Deployment, which triggers a pod rollout. Requests already in flight can fail, and requests during cold failover may need to be retried.</p>
+<p>So this isn&#39;t zero-downtime failover, at least not yet.</p>
+<p>Also, technically speaking, this isn&#39;t a per-request GPU scheduler. It is an availability-aware inference controller. It doesn&#39;t dynamically allocate individual requests based on GPU utilization or queue length.</p>
+<p>That&#39;s something I&#39;d like to explore later.</p>
+<h3>Why not just use a Python script?</h3>
+<p>To be fair, for two machines, a Python script that checks whether my laptop is online and switches an endpoint would probably have worked.</p>
+<p>But I wanted something that could recover from failed operations and changes in cluster state without depending on a sequence of commands executing successfully.</p>
+<p>The reconciliation approach handles this more naturally: observe the current state, determine what needs to change, apply the change, and repeat.</p>
+<p>It also made the project a useful introduction to writing custom Kubernetes controllers instead of just deploying applications onto a cluster.</p>
+<p><a id="section-03"></a></p>
+<h2>03 — Distributed Tracing and Observability</h2>
+<p>Once I had the infrastructure running, the next problem was figuring out why some interactions felt noticeably slower than others.</p>
+<p>A voice assistant has several stages, and each can introduce latency:</p>
+<ul>
+<li>Capturing and transferring audio</li>
+<li>Speech recognition</li>
+<li>LLM processing and token generation</li>
+<li>Speech synthesis</li>
+<li>Returning audio to the device</li>
+</ul>
+<p>Even if each model performs reasonably well individually, the total response time can still be frustrating.</p>
+<p>Simply measuring the time between sending a request and receiving a response doesn&#39;t tell me which stage is responsible.</p>
+<p>So I set up an observability stack using <strong>Prometheus, Grafana, OpenTelemetry, and Tempo</strong>.</p>
+<p>Prometheus scrapes metrics from the services every 15 seconds, while Grafana provides dashboards for request latency, error rates, pod health, and hardware utilization.</p>
+<p>OpenTelemetry and Tempo let me trace requests across the STT, agent, and TTS services.</p>
+<p>This means I can inspect how much time each stage takes rather than guessing where the bottleneck might be.</p>
+<figure class="blog-figure">
+<img src="../assets/voice-assistant-obs-tui.png" alt="Terminal observability dashboard showing host memory, GPU usage, Kubernetes pods, turn latency, and recent traces">
+<figcaption>Figure 1: The terminal dashboard shows host memory, both GPUs, pod health, end-to-end latency, and recent turns split into STT, LLM, and TTS.</figcaption>
+</figure>
+
+<h3>Writing my own GPU exporter</h3>
+<p>I also wanted GPU-level visibility.</p>
+<p>In particular, I needed to understand how much VRAM and GPU compute each inference configuration was consuming, especially on the GTX 1650.</p>
+<p>I initially used NVIDIA&#39;s DCGM Exporter, but found its memory footprint unnecessarily large for my setup.</p>
+<p>So I wrote my own lightweight GPU metrics exporter using NVIDIA&#39;s Management Library (NVML).</p>
+<p>The result was a reduction in the monitoring component&#39;s measured memory footprint from approximately <strong>405 MiB to 37 MiB</strong>, or about <strong>91%</strong>.</p>
+<p>Along with GPU utilization and memory usage, I added metrics for GPU clocks, throttling reasons, energy consumption, XID errors, and VRAM usage per pod.</p>
+<p>I appreciate the irony of spending time optimizing the monitoring system because it was consuming too many resources on the system it was supposed to monitor.</p>
+<p>But on a machine with limited resources, those savings actually matter.</p>
+<p>It also gives me more useful information when investigating performance: I can examine GPU memory pressure and utilization alongside the inference service&#39;s latency.</p>
+<p>I built a small terminal dashboard as well, since apparently Grafana wasn&#39;t enough. It shows host memory, GPU usage, pod status, latency, and recent turns without having to open a browser.</p>
+<p><a id="section-04"></a></p>
+<h2>04 — Benchmarking Speech-to-Text Models</h2>
+<p>With the infrastructure in place, the next question was which models I should actually run.</p>
+<p>The goal wasn&#39;t necessarily to use the best-performing speech model on a benchmark leaderboard. I needed something that would run quickly, consume relatively little memory, and still provide usable transcription quality.</p>
+<p>I benchmarked multiple STT models on my available hardware, comparing their inference latency and memory requirements.</p>
+<div class="blog-gallery blog-gallery-two" aria-label="Speech-to-text benchmark charts">
+<figure class="blog-figure"><img src="../assets/voice-assistant-stt-cpu.svg" alt="Scatter plot of median STT request latency versus peak RAM on the home server CPU"><figcaption>Figure 2a: CPU speech-to-text latency versus peak RAM.</figcaption></figure>
+<figure class="blog-figure"><img src="../assets/voice-assistant-stt-gpu.svg" alt="Scatter plot of median STT request latency versus VRAM on the GTX 1650"><figcaption>Figure 2b: GPU speech-to-text latency versus VRAM.</figcaption></figure>
+</div>
+
+<p>One thing that became apparent pretty quickly was that larger models weren&#39;t automatically worth the additional resource consumption.</p>
+<p>For example, Moonshine base took approximately <strong>0.40 seconds per request while using 274 MiB</strong>, making it practical to run on the CPU of my home server.</p>
+<p>Depending on the model, the Whisper configurations I tested were approximately 2–50 times slower on this hardware.</p>
+<p>Running Whisper on the GTX 1650 wasn&#39;t necessarily a solution either. Some configurations were only marginally faster than their CPU counterparts while consuming more total memory. Whisper large couldn&#39;t fit into the GTX 1650&#39;s 4 GB VRAM budget.</p>
+<p>I eventually deployed <strong>Moonshine base</strong>.</p>
+<p>Interestingly, Moonshine tiny was slightly faster at approximately 0.36 seconds and used just 138 MiB. So the latency and memory measurements alone actually favor tiny.</p>
+<p>An additional transcription-quality comparison would be useful to properly establish when the larger model is worth deploying.</p>
+<p>The broader lesson from these benchmarks was that selecting models for a distributed application is different from evaluating them in isolation.</p>
+<p>A model might be faster or more accurate, but if it takes up resources that another service needs, that tradeoff affects the performance of the entire assistant.</p>
+<p><a id="section-05"></a></p>
+<h2>05 — Benchmarking Text-to-Speech Models</h2>
+<p>TTS presented a similar challenge.</p>
+<p>I wanted the assistant to respond quickly while still sounding reasonably natural. Waiting several seconds for speech synthesis to finish isn&#39;t particularly enjoyable when you&#39;re trying to have a conversation.</p>
+<p>I compared several TTS models across my available hardware, measuring their inference speed and memory consumption.</p>
+<div class="blog-gallery blog-gallery-two" aria-label="Text-to-speech benchmark charts">
+<figure class="blog-figure"><img src="../assets/voice-assistant-tts-cpu.svg" alt="Scatter plot of time to synthesize ten seconds of speech versus peak RAM on the home server CPU"><figcaption>Figure 3a: CPU text-to-speech speed versus peak RAM.</figcaption></figure>
+<figure class="blog-figure"><img src="../assets/voice-assistant-tts-gpu.svg" alt="Scatter plot of time to synthesize ten seconds of speech versus VRAM on the GTX 1650 and RTX 4060"><figcaption>Figure 3b: GPU text-to-speech speed versus VRAM.</figcaption></figure>
+</div>
+
+<p>The results made the tradeoffs fairly clear.</p>
+<p>On the home server, <strong>KittenTTS nano</strong> achieved approximately <strong>3.4× real-time synthesis</strong> using 250 MiB, with speech speed configured to 1.6×.</p>
+<p>Meanwhile, Kokoro and VITS running on the GTX 1650 were approximately seven times faster in the tested configurations, but required six to eight times as much memory.</p>
+<p>These were measurements across different execution environments, so they shouldn&#39;t be interpreted as a controlled comparison of model architectures alone.</p>
+<p>For my setup, the question was whether the additional synthesis speed justified keeping more resources occupied, especially on the GPU that also needed to support fallback LLM inference.</p>
+<p>I ended up deploying KittenTTS on the CPU, allowing the GPU to remain available for other workloads.</p>
+<h3>Streaming the response</h3>
+<p>There was also another way to improve the perceived responsiveness of the assistant without necessarily changing the TTS model.</p>
+<p>Rather than waiting for the LLM to finish generating its entire response before starting speech synthesis, I implemented sentence-level streaming.</p>
+<p>As sentences become available, they can be passed to TTS and returned to the device without waiting for the complete answer.</p>
+<p>This allows parts of text generation and speech synthesis to overlap.</p>
+<p>The downside is that sentence-level streaming still requires waiting for enough generated text to form a sentence. It also introduces tradeoffs around audio continuity and the size of the chunks being synthesized.</p>
+<p>But it highlights an important distinction: <strong>the time taken to generate an entire response isn&#39;t the same as the time the user waits before hearing something.</strong></p>
+<p>For a voice assistant, I care much more about the latter.</p>
+<p><a id="section-06"></a></p>
+<h2>06 — What I&#39;ve Learned and What&#39;s Next</h2>
+<p>The project started with the goal of running a local voice assistant on hardware I already owned.</p>
+<p>What I&#39;ve ended up spending most of my time on, however, is everything surrounding the actual models.</p>
+<p>The biggest thing I&#39;ve learned is that <strong>getting inference to run and getting an entire inference pipeline to run well are two very different problems</strong>.</p>
+<p>A model can have excellent benchmark numbers but still be a poor choice for a resource-constrained system. A Kubernetes deployment can be healthy while the actual inference backend isn&#39;t ready. And knowing the total latency of a request isn&#39;t especially helpful if you can&#39;t identify which component is responsible.</p>
+<p>There are still several things I want to work on:</p>
+<ul>
+<li><strong>End-to-end latency benchmarking:</strong> Measuring the time from the user finishing speaking to the first audible response, including p50 and p95 latency.</li>
+<li><strong>More comprehensive failover testing:</strong> Comparing cold and warm standby configurations under different failure conditions.</li>
+<li><strong>Better resource-aware inference management:</strong> Exploring workload-aware scheduling rather than relying entirely on backend availability.</li>
+<li><strong>Reducing unnecessary latency:</strong> Using the traces and GPU metrics to identify bottlenecks across the complete pipeline.</li>
+</ul>
+<p>For now, I&#39;m fairly happy with how much I&#39;ve managed to squeeze out of an RTX 4060, a GTX 1650, and a home server that probably didn&#39;t expect to become an inference cluster.</p>
+<p>Is running your own Kubernetes cluster, GPU monitoring infrastructure, and multiple machine-learning models just to talk to a tiny ESP32 necessary?</p>
+<p>Probably not.</p>
+<p>Was it worth doing anyway? Absolutely.</p>
+<p>In Part 2, I&#39;ll talk about how I got the ESP32 to communicate with my laptops over BLE through an Android relay, built the hands-free voice pipeline, and gave the assistant access to the internet and other tools.</p>
+<p>Because using my phone to Google something would have been far too straightforward.</p>
+<hr>
+<p><strong>GitHub:</strong> <a href="https://github.com/adixg/voice-assistant">github.com/adixg/voice-assistant</a></p>
+
+        <div class="blog-actions">
+          <a href="../index.html#projects">← Back to projects</a>
+          <a href="https://github.com/adixg/voice-assistant" target="_blank" rel="noreferrer">↗ View Voice Assistant on GitHub</a>
+          <a href="#top">▲ Top</a>
+        </div>
+      </div>
+    </article>
+  </main>
+</div>
+<!-- Cloudflare Web Analytics -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "e4b08096554c470397966703f34600cf"}'></script>
+<!-- End Cloudflare Web Analytics -->
+</body>
+</html>

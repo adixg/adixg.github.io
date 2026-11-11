@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 500" width="820" height="500" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+<title id="t">STT on the GTX 1650: seconds per request by VRAM</title>
+<desc id="d">Whisper tiny: 0.76 s · 223 MiB; Whisper base: 1.17 s · 383 MiB; Whisper small: 3.24 s · 831 MiB; Whisper medium: 9.56 s · 2.1 GB</desc>
+<rect width="820" height="500" fill="#1a1a19"/>
+<text x="84" y="30" font-size="16" font-weight="600" fill="#ffffff">STT on the GTX 1650: seconds per request by VRAM</text>
+<rect x="84.0" y="48.0" width="12" height="12" rx="2" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="102" y="58" font-size="12.5" fill="#c3c2b7">GTX 1650, 4 GB</text>
+<line x1="84" x2="790" y1="424.0" y2="424.0" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="428.0" font-size="12" text-anchor="end" fill="#c3c2b7">0 s</text>
+<line x1="84" x2="790" y1="370.7" y2="370.7" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="374.7" font-size="12" text-anchor="end" fill="#c3c2b7">2 s</text>
+<line x1="84" x2="790" y1="317.3" y2="317.3" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="321.3" font-size="12" text-anchor="end" fill="#c3c2b7">4 s</text>
+<line x1="84" x2="790" y1="264.0" y2="264.0" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="268.0" font-size="12" text-anchor="end" fill="#c3c2b7">6 s</text>
+<line x1="84" x2="790" y1="210.7" y2="210.7" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="214.7" font-size="12" text-anchor="end" fill="#c3c2b7">8 s</text>
+<line x1="84" x2="790" y1="157.3" y2="157.3" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="161.3" font-size="12" text-anchor="end" fill="#c3c2b7">10 s</text>
+<line x1="84" x2="790" y1="104.0" y2="104.0" stroke="#2e2e2c" stroke-width="1"/>
+<text x="74" y="108.0" font-size="12" text-anchor="end" fill="#c3c2b7">12 s</text>
+<line x1="84" x2="790" y1="424" y2="424" stroke="#55544f"/>
+<line x1="84.0" x2="84.0" y1="424" y2="429" stroke="#55544f"/>
+<text x="84.0" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">100 MiB</text>
+<line x1="203.5" x2="203.5" y1="424" y2="429" stroke="#55544f"/>
+<text x="203.5" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">200 MiB</text>
+<line x1="361.5" x2="361.5" y1="424" y2="429" stroke="#55544f"/>
+<text x="361.5" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">500 MiB</text>
+<line x1="485.1" x2="485.1" y1="424" y2="429" stroke="#55544f"/>
+<text x="485.1" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">1 GB</text>
+<line x1="604.7" x2="604.7" y1="424" y2="429" stroke="#55544f"/>
+<text x="604.7" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">2 GB</text>
+<line x1="724.2" x2="724.2" y1="424" y2="429" stroke="#55544f"/>
+<text x="724.2" y="444" font-size="12" text-anchor="middle" fill="#c3c2b7">4 GB</text>
+<text x="437.0" y="468" font-size="12.5" text-anchor="middle" fill="#c3c2b7">VRAM in use on the card during the run (log scale)</text>
+<text x="790" y="94" font-size="11.5" text-anchor="end" fill="#c3c2b7">lower is faster, further left is lighter · 50 requests each</text>
+<line x1="724.2" x2="724.2" y1="104" y2="424" stroke="#c3c2b7" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="718.2" y="118" font-size="11.5" text-anchor="end" fill="#c3c2b7">card limit · Whisper large-v2 / v3 ran out of memory</text>
+<rect x="216.3" y="397.9" width="12" height="12" rx="2" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<rect x="309.6" y="386.7" width="12" height="12" rx="2" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<rect x="443.1" y="331.5" width="12" height="12" rx="2" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<rect x="605.3" y="163.1" width="12" height="12" rx="2" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="222.3" y="377.9" font-size="12.5" font-weight="600" text-anchor="middle" fill="#ffffff">Whisper tiny</text>
+<text x="222.3" y="392.9" font-size="11.5" text-anchor="middle" fill="#c3c2b7">0.76 s · 223 MiB</text>
+<text x="327.6" y="396.7" font-size="12.5" font-weight="600" text-anchor="start" fill="#ffffff">Whisper base</text>
+<text x="327.6" y="411.7" font-size="11.5" text-anchor="start" fill="#c3c2b7">1.17 s · 383 MiB</text>
+<text x="461.1" y="341.5" font-size="12.5" font-weight="600" text-anchor="start" fill="#ffffff">Whisper small</text>
+<text x="461.1" y="356.5" font-size="11.5" text-anchor="start" fill="#c3c2b7">3.24 s · 831 MiB</text>
+<text x="599.3" y="159.1" font-size="12.5" font-weight="600" text-anchor="end" fill="#ffffff">Whisper medium</text>
+<text x="599.3" y="174.1" font-size="11.5" text-anchor="end" fill="#c3c2b7">9.56 s · 2.1 GB</text>
+</svg>
