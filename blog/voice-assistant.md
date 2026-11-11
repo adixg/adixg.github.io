@@ -39,12 +39,12 @@ In Part 2, I'll get into the actual voice assistant: how the ESP32 communicates 
 
 The assistant itself runs on an M5StickS3, a tiny ESP32-S3 device with a microphone, speaker, and display.
 
-<figure class="blog-figure">
+<figure class="blog-figure blog-device-figure">
 <img src="../assets/m5sticks3.webp" alt="M5StickS3 hardware showing its display, microphone, speaker, buttons, USB-C port, battery, and ESP32-S3 processor">
 <figcaption>The M5StickS3 packs the microphone, speaker, display, controls, and ESP32-S3 into a tiny enclosure. Image: <a href="https://shop.m5stack.com/products/m5sticks3-esp32s3-mini-iot-dev-kit">M5Stack</a>.</figcaption>
 </figure>
 
-I implemented an on-device wake-word detector using microWakeWord, so saying "Assistant" activates it without needing to press any buttons. Once it detects that I've finished speaking, it sends the audio over Bluetooth Low Energy (BLE) to my Android phone, which acts as a relay to the backend.
+I implemented an on-device wake-word detector using microWakeWord, so saying "Assistant" activates it without needing to press any buttons. Once speech begins, the firmware sends a `START` frame and streams PCM audio chunks over Bluetooth Low Energy (BLE) as the microphone records them. The on-device endpointer detects when I stop speaking, sends the final chunk followed by `STOP`, and closes the turn. My Android phone relays those frames to the backend over WebSocket.
 
 The backend runs on a lightweight Kubernetes distribution called **k3s**, with three main components:
 
@@ -61,7 +61,7 @@ The STT, agent, and TTS services run on my always-on home server. The LLM backen
 
 <pre class="architecture" aria-label="Overall voice assistant architecture">M5StickS3
 wake word · microphone · speaker
-        │ BLE
+        │ live PCM chunks over BLE
         ▼
 Android relay
 BLE central · WebSocket client
@@ -97,7 +97,7 @@ There are two main scenarios.
 
 The controller checks whether the RTX 4060 node is `Ready` and whether its llama.cpp inference server is actually available. If both conditions are satisfied, it configures the agent to use Qwen3-8B on the RTX 4060.
 
-Once the agent rollout has completed and the RTX 4060 has remained available for 60 seconds, the controller scales the GTX 1650 standby deployment down to zero. This frees approximately **1 GiB of RAM and 3.4 GiB of VRAM** on the home server. The 60-second stability window is important because I don't want a laptop that briefly disconnects and reconnects to cause unnecessary model reloads.
+Once the agent rollout has completed and the RTX 4060 has remained available for 60 seconds, the controller scales the GTX 1650 standby deployment down to zero. This frees approximately **1 GiB of RAM and 2.7 GiB of VRAM** on the home server. The 60-second stability window is important because I don't want a laptop that briefly disconnects and reconnects to cause unnecessary model reloads.
 
 **Scenario 2: My laptop goes offline**
 
@@ -124,7 +124,7 @@ The controller also moves TTS with the GPU allocation. When the RTX 4060 is serv
 
 ### The tradeoff: cold versus warm standby
 
-Starting the fallback deployment from zero requires loading the model into memory, initializing the inference server, and waiting for readiness. I measured approximately **61 seconds for the cold fallback to become ready**, excluding the additional time Kubernetes may take to detect that the laptop has disappeared. That's obviously not ideal if I'm in the middle of a conversation.
+Starting the fallback deployment from zero requires loading the model into memory, initializing the inference server, and waiting for readiness. I measured approximately **70–76 seconds for the cold standby to become ready**, excluding the additional time Kubernetes may take to detect that the laptop has disappeared. That's obviously not ideal if I'm in the middle of a conversation.
 
 An alternative is to keep the GTX 1650 model running in the background. That makes failover much faster, but permanently occupies RAM and VRAM on my already resource-constrained home server.
 
@@ -146,7 +146,7 @@ Once I had the infrastructure running, the next problem was figuring out why som
 
 A voice assistant has several stages, and each can introduce latency:
 
-- Capturing and transferring audio
+- Streaming microphone audio while it is being recorded
 - Speech recognition
 - LLM processing and token generation
 - Speech synthesis
@@ -211,9 +211,11 @@ On the home server, **KittenTTS nano** achieved approximately **3.4× real-time 
 
 For my setup, the question was whether the additional synthesis speed justified keeping more resources occupied, especially on the GPU that also needed to support fallback LLM inference. I ended up running both: Kokoro is the main voice whenever the RTX 4060 handles the LLM and leaves the GTX 1650 free, while the always-running KittenTTS CPU pod takes over whenever the 1650 is needed for fallback inference. The Kubernetes controller switches the `tts` Service between them, keeping the CPU pod available while scaling the GPU pod with the card's availability.
 
-### Streaming the response
+### Streaming in both directions
 
-There was also another way to improve the perceived responsiveness of the assistant without necessarily changing the TTS model. Rather than waiting for the LLM to finish generating its entire response before starting speech synthesis, I implemented sentence-level streaming.
+The assistant starts moving audio before I finish speaking. When the endpointer detects speech, the firmware sends a `START` frame, a short buffered pre-roll so the beginning of the first word isn't lost, and then each microphone chunk as it is recorded. End of speech sends the final chunk and a `STOP` frame, which closes the turn. The gateway collects those chunks into the utterance that it passes to STT, so audio capture and transport overlap even though transcription begins after the turn ends.
+
+There was also another way to improve the perceived responsiveness of the response without necessarily changing the TTS model. Rather than waiting for the LLM to finish generating its entire answer before starting speech synthesis, I implemented sentence-level streaming.
 
 As sentences become available, they can be passed to TTS and returned to the device without waiting for the complete answer. This allows parts of text generation and speech synthesis to overlap.
 
