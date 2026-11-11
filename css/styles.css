@@ -106,8 +106,7 @@ hr { border: 0; border-top: 1px dashed var(--purple); }
 .project-image, .dotfiles-image { display: block; padding: 4px; border: 2px inset var(--purple); background: var(--bg); }
 .project-image img, .dotfiles-image img { display: block; width: 100%; height: auto; }
 .localinferos-project .project-image img { aspect-ratio: 16 / 10; object-fit: cover; object-position: top; }
-.companion-project .project-image { background: radial-gradient(circle at center,var(--deep-purple),var(--bg) 68%); }
-.companion-project img { aspect-ratio: 16 / 9; object-fit: contain; image-rendering: pixelated; }
+.companion-project img { aspect-ratio: 16 / 10; object-fit: cover; object-position: top; }
 .project-console { min-height: 190px; padding: 16px; border: 2px inset var(--purple); color: var(--purple); background: repeating-linear-gradient(0deg,var(--bg) 0,var(--bg) 3px,var(--deep-purple) 4px); display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; box-shadow: inset 0 0 28px var(--deep-purple); }
 .project-console b { color: var(--cream); font-size: 1.45rem; line-height: 1.05; text-shadow: 2px 2px var(--deep-purple); }
 .project-console span { color: var(--gold); font-size: .72rem; line-height: 1.5; }
